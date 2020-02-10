@@ -1,0 +1,3 @@
+*.pyc
+KinetiKit.egg-info/*
+.ipynb_checkpoints
