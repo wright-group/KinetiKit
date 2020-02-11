@@ -1,9 +1,15 @@
 KinetiKit
 
 INSTALLATION INSRUCTIONS:
+The latest releases of this package can be found on PyPI: https://pypi.org/project/KinetiKit/. 
+An Anaconda Python installation is recommended: https://www.anaconda.com/distribution/
+Open the Anaconda Command Prompt and run: 
 
-Callup terminal in this directory and use:
-*python setup.py develop*
+pip install KinetiKit
+
+To update to the latest version:
+
+pip install KinetiKit -upgrade
 
 
 LIST OF EXAMPLE FILES (INSTRUCTIONS BELOW)
