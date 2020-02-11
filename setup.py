@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="KinetiKit",
-    packages=['KinetiKit'],
+    packages=find_packages(exclude=("tests", "tests.*")),
     python_requires=">=3.6",
     install_requires=[
         "matplotlib>=3.0",
