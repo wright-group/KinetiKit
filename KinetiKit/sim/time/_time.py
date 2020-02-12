@@ -2,8 +2,7 @@ from KinetiKit.units import ns, ps, fs, MHz
 import numpy as np
 
 
-def linear(period=12.5 * ns,N=5000,
-    subsample=1, pulse_window=2 * ps):
+def linear(period=12.5 * ns,N=5000, subsample=1):
     """Time parameters for simulation.
     Assumes linearly spaced datapoints.
 
@@ -19,10 +18,7 @@ def linear(period=12.5 * ns,N=5000,
         How many time points are simulated between recorded data points.
         Default is 20. Simulation output will have `N // subsample` time
         points.
-    pulse_window : float
-        Defines the interval of the time array over which the pulse must 
-        be accounted for. Units of seconds. Default value is 40 ps.
-
+        
     Returns
     -------
     dictionary
