@@ -5,7 +5,6 @@ Example file for fitting a data object with a biexponential function.
 Requires numpy, scipy, matplotlib, and time packages along with TRPL package
 """
 
-
 import os
 import time
 
@@ -45,7 +44,6 @@ do = data.lib.data_from_SPCM(p, key = key, skip_h=200+154, skip_f=884,
                                          weigh_by_coll=True, metadata=True)
     
 #--- Transformations on data
-do.dark_subtract(os.path.join(dir_path, subfolder, 'dark.asc'), 300)
 do.interp(dtime)
 do.remove_zeros()
 all_y = do.y
@@ -136,7 +134,7 @@ for i, key in enumerate(keys):
     trace_dict[key+'_sims'] = aligned_sims
 
 if doFit:            
-    saveparam_dict = kin_kit.saveparam_dict(system, opt, bounds, sim_comp_args, doFit)
+    saveparam_dict = kin_kit.saveparam_dict(system, opt, None, bounds, sim_comp_args, doFit)
     
 def save():
     if not os.path.exists(destfolder):
