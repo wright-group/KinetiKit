@@ -263,7 +263,7 @@ def simulate_and_compare(varparams, varparamkeys, system, data_arrays, to,
     if condensed_output:
         return np.sum(diffs**2)
     else:
-        return diffs
+        return diffs.flatten()
 
 def sac_args(varparamkeys, system, data_arrays, to, 
                          light, powers=None, irf_fwhm=40*ps, N_coarse=500, roll_value=0, 

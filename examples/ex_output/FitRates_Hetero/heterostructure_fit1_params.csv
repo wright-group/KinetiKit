@@ -1,0 +1,35 @@
+k1_ann,1028062551.6694881 
+k1_dis,19990060731.60315 
+k1_rec,616448.0202139845 
+cs1,0.2 
+k2_ann,97878299.98947556 
+k2_dis,13005698211.00069 
+k2_rec,11104.755014469647 
+cs2,0.2 
+k_xtr,9988834724.038673 
+k_etr,0 
+k_htr,0 
+Model type,Hetero 
+Sum of Sq. of Residuals,5.236222070335183 
+No. of DE Evaluations,9983 
+No. of DE Iterations,94 
+No. of LS Evaluations,133 
+k1_ann_bounds,100000000.0, 20000000000.0 
+k1_dis_bounds,100000000.0, 20000000000.0 
+k1_rec_bounds,1000.0, 10000000.0 
+k2_ann_bounds,100000000.0, 9000000000.0 
+k2_dis_bounds,100000000.0, 20000000000.0 
+k2_rec_bounds,1000.0, 10000000.0 
+k_xtr_bounds,10000000.0, 10000000000.0 
+k1_ann_error,1324941689.5121098 
+k1_dis_error,25837375320.072037 
+k1_rec_error,794147.5389229398 
+k2_ann_error,44665923.341129825 
+k2_dis_error,1837253806.2541747 
+k2_rec_error,7291.1242225031965 
+k_xtr_error,27048453017.699776 
+comparison,log 
+absolute,True 
+time_limits,None 
+norm_comp,True 
+roll_criterion,max 
