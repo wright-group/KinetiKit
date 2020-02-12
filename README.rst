@@ -1,9 +1,10 @@
 KinetiKit
+---------
 
 INSTALLATION INSRUCTIONS:
-
-Callup terminal in this directory and use:
-*python setup.py develop*
+The latest releases of this package can be found on PyPI: https://pypi.org/project/KinetiKit/. 
+An Anaconda Python installation is recommended: https://www.anaconda.com/distribution/
+Open the Anaconda Command Prompt and run ``pip install KinetiKit``. To update to the latest version if you have already installed the package, run ``pip install KinetiKit -upgrade`` instead.
 
 
 LIST OF EXAMPLE FILES (INSTRUCTIONS BELOW)
@@ -17,6 +18,14 @@ LIST OF EXAMPLE FILES (INSTRUCTIONS BELOW)
 * simRates_Hetero
 * simRates_Mono
 * VisualizeSteadyState
+
+QUICK NOTES FOR NON-PYTHONIC FOLKS:
+1. Note on File paths: If dir_path = os.path.dirname(os.path.realpath(__file__)), 
+then all file paths will be read relative to where this file is located.
+Alternatively, you can set the directory path as it "normally" appears, e.g.
+dir_path= 'C:\Users\Me\Documents\MyData'
+	
+
 
 INSTRUCTIONS FOR FitRates_Hetero AND FitRates_Mono:
 * Specify doFit; if False, the program will simply simulate the system with the current parameters.
