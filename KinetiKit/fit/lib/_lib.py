@@ -143,6 +143,8 @@ def simulate_and_compare(varparams, varparamkeys, system, data_arrays, to,
     roll_value : float, optional
         Value on ``to['array']`` to which maxima of aligned arrays will be 
         shifted to.
+    comparison : 'linear' or 'log'
+        see ``elementwise_diff`` function. Default is linear.
     absolute : boolean, optional
         see ``elementwise_diff`` function. Default is False.
     limits : list of 2 values, optional

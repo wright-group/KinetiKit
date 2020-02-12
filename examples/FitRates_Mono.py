@@ -1,8 +1,10 @@
 """
 Fit with monolithic models (usually one power and PL output)
 
-Example file for fitting a data object with a simulation of the Mono type. 
-Requires numpy, scipy, matplotlib, and time packages along with KinetiKit package
+Example script for fitting TRPL data with a simulation of the Mono type, 
+plotting, and saving it.
+
+See QUICK NOTES in README file () (github.com/wright-group/KinetiKit) for help
 """
 
 import os
@@ -14,54 +16,70 @@ import matplotlib.pyplot as plt
 
 from KinetiKit import sim, fit, data, artists
 from KinetiKit import kit as kin_kit
-from KinetiKit.units import nW, uW, MHz, nm, ps, ns
+from KinetiKit.units import units, nW, uW, MHz, nm, ps, ns, fs
 from KinetiKit.settings import settings
 
 
-doFit = True
-doLS = True # whether to refine the optimization via a local least-squares fitting (and obtain error estimates)
+###############################################################################
+# Start of editable section
+###############################################################################
 
-settings['display_counter'] = True # display counter showing search iteration
+"""
+Define relevant filenames. See QUICK NOTES > Note on File paths 
+"""
+#--- data to be imported 
+key = 'perovskite' # identifier for your data (used in plot legend)
+dir_path = os.path.dirname(os.path.realpath(__file__)) # directory path
+subfolder = 'ex_data' # enter '' if no subfolder
+filename = r'sample_TRPL.asc'
 
-#--- Creating Time Object
-to = sim.time.linear(N=1000, period=12.5*ns)
-dtime = to['array'][::to['subsample']]
+#--- file details:
+skip_header = 154; skip_footer = 884 # see data file for how many lines to skip
+collection_time = 900 # data collection time in seconds
 
-#--- Create System Instance (select model from sim.systems)
+#--- subtract dark counts? (ignore all but next line if False)
+sub_dark_counts = True
+dark_path = os.path.join(dir_path, subfolder, 'dark.asc')
+dark_skip_header = 354; dark_skip_footer = 884
+dark_collection_time = 300 
+
+#--- output 
+# CALL save_all() ON THE CONSOLE AFTER FITTING IS COMPLETE,
+# TO SAVE PARAMETERS AND PLOTS
+destpath = os.path.join(dir_path, 'ex_output', 'FitRates_Mono')
+output_name = key # can be anything, DO NOT include extension
+
+
+"""
+Define Time and Excitation Parameters
+"""
+#--- arguments of sim.lib.Excitation()
+pulse_power = 1000*nW
+reprate = 80 * MHz
+pulse_fwhm = 100*fs
+pulse_wavelength = 400*nm
+#--- arguments of sim.time.linear()
+N= 1000
+time_unit = 'ns'
+period = 1/reprate # simulation time axis should span (1/reprate) of laser
+subsample = 1 
+#--- other
+limits = None # set to [start*ns, end*ns] when data time < 1/reprate
+N_coarse = 500 # number of time points for coarse simulation
+align_to = 0.5*ns # value to which data and simulation are aligned for saving
+
+"""
+Define Instrument Response Function FWHM (Note: currently, only simulated
+FWHM are supported)
+"""
+irf_fwhm = 40*ps
+
+"""
+Choose System type, Initial parameters, and search boundaries. 
+See QUICK NOTES > Note on Setting and Fitting parameters in README file
+"""
 system = sim.systems.Mono()
 
-#--- Creating Data Object(s)
-dir_path = os.path.dirname(os.path.realpath(__file__)) # this will read files from the path this file is in
-#dir_path = r'C:\...' # alternatively you can specify the path from which to read files
-subfolder = r'ex_data' # set subfolder='' if no subfolder
-destfolder = os.path.join(dir_path, r'ex_output', r'FitRates_Mono') # folder where any output files will be saved
-
-filename = r'pure_metadata_TRPL.asc'
-
-key = 'perovskite' # this will be the legend label, can be anything
-power = 1000*nW #Excitation power
-
-dark_path = os.path.join(dir_path, subfolder, 'dark.asc')
-dark_counts = data.lib.data_from_SPCM(dark_path,
-                                    skip_h=353, skip_f=884,
-                                    metadata=True, weigh_by_coll=True)
-
-file_path = os.path.join(dir_path, subfolder,  filename)
-do = data.lib.data_from_SPCM(file_path, key = key,
-                                    skip_h=353, skip_f=884,
-                                    weigh_by_coll=True, metadata=True, coll=60)
-
-
-# Various transformations performed on data
-do.dark_subtract(dark_counts, method='elementwise')
-do.interp(dtime)
-do.remove_zeros()
-
-all_y = do.y
-
-#--- Parameters of simulation and initializing of system
-# Note that, as long as bounds have been set for a parameter, its value given
-# in initparams does NOT affect the Differential Evolution search
 initparams = {
     'k_ann': 1.25e8,
     'k_dis': 2.01e9,
@@ -69,22 +87,66 @@ initparams = {
     'cs': 0.5,
     }
 
-system.update(**initparams)
-
-#--- Fitting boundaries
 bounds = {
         'k_ann': (1e6, 1e10),
         'k_dis': (5e6, 3.2e10), 
         'k_rec': (1e3, 1e8),
-        }  
+        } 
 
+"""
+Fitting preferences
+"""
+doFit = True # if False, system will be modeled with initparams
+doLS = True # whether to refine the optimization via a local least-squares 
+            # fitting (and obtain error estimates). Ignore if doFit = False
+settings['display_counter'] = True # display counter showing search iteration
 
+#--- arguments of sim.fit.simulate_and_compare() -- see docstring
+comparison_type = 'linear' # "linear" of "log" comparison betw. data and sim.
+absolute = True # return avg. of absolute vs. relative differences
+norm = True # False recommended for simultaneous multi-power fitting;
+            # see docstring
+roll_criterion = 'max' # 'max' or 'steep': : whether to align data and
+                       # simulation based on their maximum or steepest point
+avgnum = 5 # how many points to consider to determine the max/steepest point
+
+###############################################################################
+# End of editable section
+###############################################################################
+
+#--- Creating Time Object
+to = sim.time.linear(N=N, period=period, subsample = subsample)
+dtime = to['array'][::to['subsample']]
+
+#--- Creating Data Object(s)
+file_path = os.path.join(dir_path, subfolder,  filename)
+do = data.lib.data_from_SPCM(file_path, key = key,
+                                    skip_h=skip_header, skip_f=skip_footer,
+                                    weigh_by_coll=True, coll=collection_time)
+
+if sub_dark_counts:
+    dark_counts = data.lib.data_from_SPCM(dark_path,
+                                    skip_h=dark_skip_header, 
+                                    skip_f=dark_skip_footer,
+                                    weigh_by_coll=True,
+                                    coll = dark_collection_time)
+    do.dark_subtract(dark_counts, method='elementwise')
+
+# Data is interpolated to match same time axis as simulation
+do.interp(dtime)
+
+all_y = do.y
+
+#--- Parameters of simulation and initializing of system
+
+system.update(**initparams)
 boundtuples = list(bounds.values()) # Bounds as used in differential_evolution function
 
 #--- Create Excitation object
-light = sim.lib.Excitation(pulse={'power':power,
-                                  'reprate': 80*MHz,
-                                  'wavelength': 400*nm})
+light = sim.lib.Excitation(pulse={'power':pulse_power,
+                                  'reprate': reprate,
+                                  'fwhm' : pulse_fwhm,
+                                  'wavelength': pulse_wavelength})
 
 # Conditions for fitting algorithm
 conditions = fit.lib.sac_args(
@@ -92,16 +154,15 @@ conditions = fit.lib.sac_args(
         system = system, 
         data_arrays = all_y,
         to = to,
-        light = light, # this and arguments above it do not need to be changed
-        irf_fwhm = 40*ps, # Instrument Response Function
-        N_coarse = 500,  
-        comparison='linear', # 'linear' or 'log'
-        absolute=True,
-        limits=None, # None or list of two time values
-        norm=True,
-        roll_criterion='max', #'max' or 'steep': whether to align data and 
-                              # simulation based on their maximum or steepest point
-        maxavgnum=5
+        light = light,
+        irf_fwhm = irf_fwhm,
+        N_coarse = N_coarse,  
+        comparison=comparison_type, # 'linear' or 'log'
+        absolute=absolute,
+        limits=limits, # None or list of two time values
+        norm=norm,
+        roll_criterion=roll_criterion, 
+        maxavgnum=avgnum
         )
 
 if doFit:
@@ -113,7 +174,8 @@ if doFit:
                                               args= conditions,
                                               )
     if doLS:
-        # Fine-tune with a least-squares fit to determine curvature of parameter space
+        # Fine-tune with a least-squares fit to determine curvature 
+        # of parameter space
         counter = 0
         opt_LS = fit.lib.fit_leastsq(fit.lib.simulate_and_compare, 
                                         p0 = opt_DE.x, 
@@ -144,24 +206,28 @@ species_set = transient # set of population's time evolution
 pl = system.PLsig(transient) # PLsig function applied to population arrays
 sims = sim.lib.convolve_irf(pl, dtime)   # PL signal convolved with IRF
 
-# Aligns data with sim either by max. (align_by_max) or steep (align_by_steep)
-align_to = 0.5*ns #value at which data and simulation are aligned for saving/diplay
-aligned_data = kin_kit.align_by_max(all_y, dtime, value = align_to, avgnum=5)
-aligned_sims = kin_kit.align_by_max(sims, dtime, value = align_to, avgnum=5)
+# alignment
+if roll_criterion == 'max':
+    aligned_data = kin_kit.align_by_max(all_y, dtime, value = align_to, avgnum=avgnum)
+    aligned_sims = kin_kit.align_by_max(sims, dtime, value = align_to, avgnum=avgnum)
+elif roll_criterion == 'steep':
+    aligned_data = kin_kit.align_by_steep(all_y, dtime, value = align_to, avgnum=avgnum)
+    aligned_sims = kin_kit.align_by_steep(sims, dtime, value = align_to, avgnum=avgnum)
+
 
 #--- Plot
 fig = artists.plot3scales.plot(dtime, aligned_data, sys_obj=None, t_dict=None,
-                     annotate=False, fig=None, linewidth=1, 
+                     unit = time_unit, annotate=False, fig=None, linewidth=1, 
                      mlabel=key+' data')
     
 artists.plot3scales.plot(dtime, aligned_sims, system, t_dict=to, ivtype='none', 
-                     annotate=True, fig=fig, ResetColorCyc=True, 
+                     unit = time_unit, annotate=True, fig=fig, ResetColorCyc=True, 
                      linewidth=6, opaq=0.4,
                      mlabel=key+' sim')
 
 #--- Saving data and parameters into dictionary
 trace_dict = {}
-trace_dict['time (ns)'] = dtime/ns
+trace_dict['time (%s)'%time_unit] = dtime/units[time_unit]
 
 trace_dict[key+'_data'] = aligned_data
 trace_dict[key+'_sims'] = aligned_sims
@@ -173,9 +239,9 @@ saveparam_dict = kin_kit.saveparam_dict(system, opt_DE, opt_LS, bounds, conditio
 
 def save_all(): 
     # save all images, parameters, and traces, in image and CSV files
-    kin_kit.save_fit(key, trace_dict, saveparam_dict, destfolder)
+    kin_kit.save_fit(output_name, trace_dict, saveparam_dict, destpath)
     plot_species(save=True)
     
 def plot_species(save=False):
     artists.plot3scales.show_species(dtime, [species_set], system, False, 
-                                     save=save, filename=key, destfolder=destfolder)
+                                     save=save, filename=key, destfolder=destpath)
