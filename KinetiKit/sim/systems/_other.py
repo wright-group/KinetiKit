@@ -1,9 +1,10 @@
 import numpy as np
 import warnings
+from KinetiKit.sim.systems import RateModel
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-class MonoEEA():
+class MonoEEA(RateModel):
     """
     Single (monolithic) system, excitons, NO free carriers, exciton-exciton 
     annihilation possible.
@@ -17,20 +18,8 @@ class MonoEEA():
                'cs': 1,
                     }
     
-    def __init__(self, **kwargs):
-        params = self.default.copy(); params.update(kwargs)
-        self.name = self.class_name
-        
-        self.keys = params.keys()
-        self.k_ann = params['k_ann'] # exciton annihilation
-        self.k_dis = params['k_dis']
-        self.k_eea = params['k_eea']
-        self.k_rec = params['k_rec']
-        self.cs = params['cs'] # absorption cross-section
-        
-        self.populations = ['x', 'e', 'h']
-        self.popnum = len(self.populations)
-   
+    populations = ['x', 'e', 'h']
+    
     def rate(self, N, photons):
         nx, ne, nh = N # free excitons, trapped excitons
         
@@ -47,17 +36,9 @@ class MonoEEA():
         nx = N[self.populations.index('x')] 
         
         return self.k_ann * nx 
-           
-    def update(self, **kwargs):
-        for key, val in kwargs.items():
-            if key in self.keys:
-                self.__setattr__(key,val)
-
-    def params(self):
-        return {key: self.__getattribute__(key) for key in self.keys}
 		
 		
-class MonoTransfer():
+class MonoTransfer(RateModel):
     """
     Single (monolithic) system, excitons, free electrons & holes, no trapping, 
     transfer to or from the system. Unlike Hetero(), only one system's output
@@ -73,19 +54,7 @@ class MonoTransfer():
     'cs': 1,
     }
     
-    def __init__(self, **kwargs):
-        params = self.default.copy(); params.update(kwargs)
-        self.name = self.class_name
-        
-        self.keys = params.keys()
-        self.k_ann = params['k_ann']
-        self.k_dis = params['k_dis']
-        self.k_rec = params['k_rec']
-        self.k_xtr = params['k_xtr']
-        self.cs = params['cs']
-
-        self.populations = ['x', 'e', 'h']
-        self.popnum = len(self.populations)
+    populations = ['x', 'e', 'h']
 
     def rate(self, N, photons):
         nx, ne, nh = N
@@ -103,12 +72,3 @@ class MonoTransfer():
         nh = N[self.populations.index('h')]
 
         return self.k_ann * nx + self.k_rec * ne * nh
-        
-    def update(self, **kwargs):
-        for key, val in kwargs.items():
-            if key in self.keys:
-                self.__setattr__(key,val)
-
-    def params(self):
-        return {key: self.__getattribute__(key) for key in self.keys}
-    
