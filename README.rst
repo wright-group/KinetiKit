@@ -21,8 +21,7 @@ LIST OF EXAMPLE FILES (INSTRUCTIONS BELOW)
 
 QUICK NOTES FOR NON-PYTHONIC FOLKS:
 
-* Note on File paths: If ``dir_path = os.path.dirname(os.path.realpath(__file__))``, then all file paths will be read \
-relative to where this file is located. Alternatively, you can set the directory path as it "normally" appears, e.g.
+* Note on File paths: If ``dir_path = os.path.dirname(os.path.realpath(__file__))``, then all file paths will be read relative to where this file is located. Alternatively, you can set the directory path as it "normally" appears, e.g.
 ``dir_path= r'C:\Users\Me\Documents\MyData'``
 	
 
