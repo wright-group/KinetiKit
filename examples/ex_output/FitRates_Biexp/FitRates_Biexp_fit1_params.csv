@@ -1,0 +1,22 @@
+A1,0.9344754295095011 
+tau1,1.1211261249206891e-10 
+tau2,2.737555565887191e-09 
+offset,0.00391281426981935 
+Model type,Biexp 
+Sum of Sq. of Residuals,4.890050773973959 
+No. of DE Evaluations,4685 
+No. of DE Iterations,72 
+No. of LS Evaluations,31 
+A1_bounds,0, 1 
+tau1_bounds,1e-10, 1e-06 
+tau2_bounds,1e-10, 1e-06 
+offset_bounds,0, 1 
+A1_error,0.0011659199308844254 
+tau1_error,3.0559831347928166e-12 
+tau2_error,4.481073534841542e-11 
+offset_error,9.401604543438527e-05 
+comparison,log 
+absolute,True 
+time_limits,None 
+norm_comp,True 
+roll_criterion,steep 

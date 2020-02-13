@@ -9,9 +9,7 @@ Requires numpy, scipy, matplotlib, and time packages along with TRPL package
 import os
 import time
 
-import numpy as np
 import scipy as sp
-import matplotlib.pyplot as plt
 
 from KinetiKit import sim, fit, data
 from KinetiKit import artists as art
@@ -37,7 +35,7 @@ dark_collection_time = 300
 #--- output 
 # CALL save_all() ON THE CONSOLE AFTER FITTING IS COMPLETE,
 # TO SAVE PARAMETERS AND PLOTS
-destpath = os.path.join(dir_path, 'ex_output')
+destpath = os.path.join(dir_path, 'ex_output/FitRates_Biexp')
 output_name = 'biexponential' # can be anything, DO NOT include extension
 
 """
@@ -69,11 +67,13 @@ initparams = {
            'A1': 1.9974e-1,
            'tau1': 1.774e-9,
            'tau2': 1e-10,
+           'offset': 0
                 } 
 bounds = {
         'A1': (0, 1),
         'tau1': (1e-10, 1e-6),
         'tau2': (1e-10, 1e-6),
+        'offset': (0,1)
         }
 
 
@@ -88,7 +88,7 @@ settings['display_counter'] = True # display counter showing search iteration
 #--- arguments of sim.fit.simulate_and_compare() -- see docstring
 comparison_type = 'log' # "linear" of "log" comparison betw. data and sim.
 absolute = True # return avg. of absolute vs. relative differences
-norm = False # False recommended for simultaneous multi-power fitting;
+norm = True # False recommended for simultaneous multi-power fitting;
             # see docstring
 roll_criterion = 'steep' # 'max' or 'steep': : whether to align data and
                        # simulation based on their maximum or steepest point
