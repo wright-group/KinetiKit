@@ -140,7 +140,7 @@ for i, power in enumerate(powers):
             pulse['power'] = power
             light = sim.lib.Excitation(pulse=pulse)
             transient, converged = sim.lib.refined_simulation(system, to, light,
-                                                      N_coarse=500)
+                                                      N_coarse=N_coarse)
             species_sets.append(transient)
             pl_at_this_power = system.PLsig(transient)
             

@@ -1,0 +1,20 @@
+k_ann,8839683130.229837 
+k_dis,14018600078.74497 
+k_rec,333625.6939336421 
+cs,0.5 
+Model type,Mono 
+Sum of Sq. of Residuals,2.687966266298658 
+No. of DE Evaluations,1174 
+No. of DE Iterations,25 
+No. of LS Evaluations,67 
+k_ann_bounds,1000000.0, 10000000000.0 
+k_dis_bounds,5000000.0, 32000000000.0 
+k_rec_bounds,1000.0, 100000000.0 
+k_ann_error,192982413.23022524 
+k_dis_error,828806062.1104758 
+k_rec_error,19401.16249741388 
+comparison,linear 
+absolute,True 
+time_limits,[0.0, 2.5e-09] 
+norm_comp,True 
+roll_criterion,max 

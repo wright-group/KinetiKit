@@ -1,5 +1,11 @@
 """
-Fit with monolithic models (usually one power and PL output)
+Fit with monolithic models (usually one power and PL output) in cases where
+data time is shorter than laser repetition rate. The main difference from the
+FitRates_Mono example is setting limits = [start time, end time] and changing 
+the plot axis limits. Note: that period of timescale should STILL be 
+1/(laser reprate) for the simulation to work properly. Additionally, note that
+N and N_coarse are the number of time points for the entire simulation period,
+not the data time.
 
 Example script for fitting TRPL data with a simulation of the Mono type, 
 plotting, and saving it.
@@ -31,14 +37,15 @@ Define relevant filenames. See QUICK NOTES > Note on File paths
 key = 'perovskite' # identifier for your data (used in plot legend)
 dir_path = os.path.dirname(os.path.realpath(__file__)) # directory path
 subfolder = 'ex_data' # enter '' if no subfolder
-filename = r'sample_TRPL.asc'
+filename = r'pure_3ns_TRPL.asc'
 
 #--- file details:
-skip_header = 154; skip_footer = 884 # see data file for how many lines to skip
-collection_time = 900 # data collection time in seconds
+skip_header = 154; skip_footer = 145 # see data file for how many lines to skip
+collection_time = 60 # data collection time in seconds
 
 #--- subtract dark counts? (ignore all but next line if False)
 sub_dark_counts = True
+sub_method = 'average' #'average' or 'elementwise'
 dark_path = os.path.join(dir_path, subfolder, 'dark.asc')
 dark_skip_header = 354; dark_skip_footer = 884
 dark_collection_time = 300 
@@ -59,12 +66,13 @@ reprate = 80 * MHz
 pulse_fwhm = 100*fs
 pulse_wavelength = 400*nm
 #--- arguments of sim.time.linear()
-N= 1000
+N= 10000
 time_unit = 'ns'
 period = 1/reprate # simulation time axis should span (1/reprate) of laser
 subsample = 1 
 #--- other
-limits = None # set to [start*ns, end*ns] when data time < 1/reprate
+limits = [0*ns, 2.5*ns] # set to [start*ns, end*ns] when data time < 1/reprate,
+                        # set limits = None otherwise
 N_coarse = 500 # number of time points for coarse simulation
 align_to = 0.5*ns # value to which data and simulation are aligned for saving
 
@@ -130,7 +138,7 @@ if sub_dark_counts:
                                     skip_f=dark_skip_footer,
                                     weigh_by_coll=True,
                                     coll = dark_collection_time)
-    do.dark_subtract(dark_counts, method='elementwise')
+    do.dark_subtract(dark_counts, method=sub_method)
 
 # Data is interpolated to match same time axis as simulation
 do.interp(dtime)
@@ -224,7 +232,9 @@ artists.plot3scales.plot(dtime, aligned_sims, system, t_dict=to, ivtype='none',
                      unit = time_unit, annotate=True, fig=fig, ResetColorCyc=True, 
                      linewidth=6, opaq=0.4,
                      mlabel=key+' sim')
-
+for ax in fig.axes:
+    ax.set_xlim(limits[0]/units[time_unit], limits[1]/units[time_unit])
+    
 #--- Saving data and parameters into dictionary
 trace_dict = {}
 trace_dict['time (%s)'%time_unit] = dtime/units[time_unit]

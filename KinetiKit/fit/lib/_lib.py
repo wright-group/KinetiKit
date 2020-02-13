@@ -50,6 +50,8 @@ def elementwise_diff(data_arrays, sim_arrays, norm=True, comparison='linear',
         diffs = np.ones(sim_arrays.shape)*100000
         return diffs
     
+    #print(len(data_arrays), len(sim_arrays))
+    
     alert=False
     if norm:
         for i, array in enumerate(data_arrays):
@@ -69,6 +71,7 @@ def elementwise_diff(data_arrays, sim_arrays, norm=True, comparison='linear',
         else: 
             print('Comparison must be linear or log.')
             return
+    #print('lendiffs', len(diffs))
     return diffs
 
 def slice_by_time(arrays, timearray, lowlim=None, hilim=None):
