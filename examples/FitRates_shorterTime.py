@@ -1,10 +1,16 @@
 """
-Fit example with models producing more than one PL output
+Fit with monolithic models (usually one power and PL output) in cases where
+data time is shorter than laser repetition rate. The main difference from the
+FitRates_Mono example is setting limits = [start time, end time] and changing 
+the plot axis limits. Note: that period of timescale should STILL be 
+1/(laser reprate) for the simulation to work properly. Additionally, note that
+N and N_coarse are the number of time points for the entire simulation period,
+not the data time.
+
+Example script for fitting TRPL data with a simulation of the Mono type, 
+plotting, and saving it.
 
 See QUICK NOTES in README file () (github.com/wright-group/KinetiKit) for help
-note: if you run doFit on this program as originally in the repository, 
-fitting may take up to 10 minutes
-
 """
 
 import os
@@ -28,27 +34,27 @@ from KinetiKit.settings import settings
 Define relevant filenames. See QUICK NOTES > Note on File paths 
 """
 #--- data to be imported 
-keys = ['n=1', 'n=1'] # identifiers for your data (used in plot legend)
+key = 'perovskite' # identifier for your data (used in plot legend)
 dir_path = os.path.dirname(os.path.realpath(__file__)) # directory path
-subfolder = r'ex_data/hetero' # enter '' if no subfolder
-filenames = [r'het_n=1_TRPL.asc', 
-             r'het_n=2_TRPL.asc']
+subfolder = 'ex_data' # enter '' if no subfolder
+filename = r'pure_3ns_TRPL.asc'
 
 #--- file details:
-skip_header = 154; skip_footer = 884 # see data file for how many lines to skip
-collection_time = 900 # data collection time in seconds
+skip_header = 154; skip_footer = 145 # see data file for how many lines to skip
+collection_time = 60 # data collection time in seconds
 
 #--- subtract dark counts? (ignore all but next line if False)
 sub_dark_counts = True
-dark_path = os.path.join(dir_path, 'ex_data', 'dark.asc')
+sub_method = 'average' #'average' or 'elementwise'
+dark_path = os.path.join(dir_path, subfolder, 'dark.asc')
 dark_skip_header = 354; dark_skip_footer = 884
 dark_collection_time = 300 
 
 #--- output 
 # CALL save_all() ON THE CONSOLE AFTER FITTING IS COMPLETE,
 # TO SAVE PARAMETERS AND PLOTS
-destpath = os.path.join(dir_path, 'ex_output', 'FitRates_hetero')
-output_name = 'heterostructure' # can be anything, DO NOT include extension
+destpath = os.path.join(dir_path, 'ex_output', 'FitRates_Mono')
+output_name = key # can be anything, DO NOT include extension
 
 
 """
@@ -60,12 +66,13 @@ reprate = 80 * MHz
 pulse_fwhm = 100*fs
 pulse_wavelength = 400*nm
 #--- arguments of sim.time.linear()
-N= 1000
+N= 10000
 time_unit = 'ns'
 period = 1/reprate # simulation time axis should span (1/reprate) of laser
 subsample = 1 
 #--- other
-limits = None # set to [start*ns, end*ns] when data time < 1/reprate
+limits = [0*ns, 2.5*ns] # set to [start*ns, end*ns] when data time < 1/reprate,
+                        # set limits = None otherwise
 N_coarse = 500 # number of time points for coarse simulation
 align_to = 0.5*ns # value to which data and simulation are aligned for saving
 
@@ -79,31 +86,20 @@ irf_fwhm = 40*ps
 Choose System type, Initial parameters, and search boundaries. 
 See QUICK NOTES > Note on Setting and Fitting parameters in README file
 """
-system = sim.systems.Hetero()
+system = sim.systems.Mono()
 
 initparams = {
-        'k1_ann': 2.298e9,
-        'k1_dis': 2.132e9,
-        'k1_rec': 6.181e5,
-        'cs1': 0.2,
-        'k2_ann': 7.242e8,
-        'k2_dis': 4.816e9,
-        'k2_rec': 4.574e4,
-        'cs2': 0.2,
-        'k_xtr': 2.407e9,
-        'k_etr': 0,
-        'k_htr': 0,
-    }  
+    'k_ann': 1.25e8,
+    'k_dis': 2.01e9,
+    'k_rec': 1.3e3,
+    'cs': 0.5,
+    }
 
 bounds = {
-        'k1_ann': (1e8, 2e10),
-        'k1_dis': (1e8, 2e10),
-        'k1_rec': (1e3, 1e7),
-        'k2_ann': (1e8, 9e9),
-        'k2_dis': (1e8, 2e10),
-        'k2_rec': (1e3, 1e7),
-        'k_xtr' : (1e7, 1e10),
-}  
+        'k_ann': (1e6, 1e10),
+        'k_dis': (5e6, 3.2e10), 
+        'k_rec': (1e3, 1e8),
+        } 
 
 """
 Fitting preferences
@@ -114,7 +110,7 @@ doLS = True # whether to refine the optimization via a local least-squares
 settings['display_counter'] = True # display counter showing search iteration
 
 #--- arguments of sim.fit.simulate_and_compare() -- see docstring
-comparison_type = 'log' # "linear" of "log" comparison betw. data and sim.
+comparison_type = 'linear' # "linear" of "log" comparison betw. data and sim.
 absolute = True # return avg. of absolute vs. relative differences
 norm = True # False recommended for simultaneous multi-power fitting;
             # see docstring
@@ -130,28 +126,24 @@ avgnum = 5 # how many points to consider to determine the max/steepest point
 to = sim.time.linear(N=N, period=period, subsample = subsample)
 dtime = to['array'][::to['subsample']]
 
-
 #--- Creating Data Object(s)
-all_y = []
-for i, filename in enumerate(filenames):
-    file_path = os.path.join(dir_path, subfolder,  filename)
-    do = data.lib.data_from_SPCM(file_path, key = keys[i],
-                                        skip_h=skip_header, skip_f=skip_footer,
-                                        weigh_by_coll=True, coll=collection_time)
-    
-    if sub_dark_counts:
-        dark_counts = data.lib.data_from_SPCM(dark_path,
-                                        skip_h=dark_skip_header, 
-                                        skip_f=dark_skip_footer,
-                                        weigh_by_coll=True,
-                                        coll = dark_collection_time)
-        do.dark_subtract(dark_counts, method='elementwise')
-    
-    # Data is interpolated to match same time axis as simulation
-    do.interp(dtime)
-    
-    all_y.append(do.y)
-all_y = np.array(all_y)
+file_path = os.path.join(dir_path, subfolder,  filename)
+do = data.lib.data_from_SPCM(file_path, key = key,
+                                    skip_h=skip_header, skip_f=skip_footer,
+                                    weigh_by_coll=True, coll=collection_time)
+
+if sub_dark_counts:
+    dark_counts = data.lib.data_from_SPCM(dark_path,
+                                    skip_h=dark_skip_header, 
+                                    skip_f=dark_skip_footer,
+                                    weigh_by_coll=True,
+                                    coll = dark_collection_time)
+    do.dark_subtract(dark_counts, method=sub_method)
+
+# Data is interpolated to match same time axis as simulation
+do.interp(dtime)
+
+all_y = do.y
 
 #--- Parameters of simulation and initializing of system
 
@@ -232,25 +224,23 @@ elif roll_criterion == 'steep':
 
 
 #--- Plot
-fig = None
-for i in range(len(aligned_data)):
-    color = ['#E24A33', '#348ABD'][i]
-    fig = artists.plot3scales.plot(dtime, aligned_data[i], sys_obj=None, t_dict=None, 
-                     annotate=False, fig = fig, linewidth=1, color=color,
-                     mlabel=keys[i]+' data')
-    artists.plot3scales.plot(dtime, aligned_sims[i], system, t_dict=to, ivtype='none', 
-                         annotate=True, fig = fig, color=color, 
-                         linewidth=6, opaq=0.4,
-                         mlabel=keys[i] + ' sim')
-
-
+fig = artists.plot3scales.plot(dtime, aligned_data, sys_obj=None, t_dict=None,
+                     unit = time_unit, annotate=False, fig=None, linewidth=1, 
+                     mlabel=key+' data')
+    
+artists.plot3scales.plot(dtime, aligned_sims, system, t_dict=to, ivtype='none', 
+                     unit = time_unit, annotate=True, fig=fig, ResetColorCyc=True, 
+                     linewidth=6, opaq=0.4,
+                     mlabel=key+' sim')
+for ax in fig.axes:
+    ax.set_xlim(limits[0]/units[time_unit], limits[1]/units[time_unit])
+    
 #--- Saving data and parameters into dictionary
 trace_dict = {}
 trace_dict['time (%s)'%time_unit] = dtime/units[time_unit]
 
-for i, key in enumerate(keys):
-    trace_dict[key+'_data'] = aligned_data[i]
-    trace_dict[key+'_sims'] = aligned_sims[i]
+trace_dict[key+'_data'] = aligned_data
+trace_dict[key+'_sims'] = aligned_sims
 
 for i, species in enumerate(species_set):
     trace_dict[key + '_' + system.populations[i]] = species
@@ -264,4 +254,4 @@ def save_all():
     
 def plot_species(save=False):
     artists.plot3scales.show_species(dtime, [species_set], system, False, 
-                                     save=save, filename=ouput_name, destfolder=destpath)
+                                     save=save, filename=output_name, destfolder=destpath)

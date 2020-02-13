@@ -132,7 +132,6 @@ def save_fit(filename, traces={}, params={}, destinationfolder=''):
     
     for i in np.arange(0,500,1):
         d = od + str(i+1)
-        print(d)
         
         condition = os.path.exists(d+'.svg') or os.path.exists(d+'.png') or os.path.exists(d+'_params.csv') or os.path.exists(d+'_traces.csv') 
         if condition:

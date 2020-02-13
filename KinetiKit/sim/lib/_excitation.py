@@ -1,11 +1,6 @@
-import time
-
 import numpy as np
-import scipy
-from scipy.signal import convolve
 
-from KinetiKit import sim
-from KinetiKit.units import units, MHz, fs, nm, uW, ps
+from KinetiKit.units import MHz, fs, nm, uW
 import KinetiKit.kit as kin_kit
 
 

@@ -50,6 +50,8 @@ def elementwise_diff(data_arrays, sim_arrays, norm=True, comparison='linear',
         diffs = np.ones(sim_arrays.shape)*100000
         return diffs
     
+    #print(len(data_arrays), len(sim_arrays))
+    
     alert=False
     if norm:
         for i, array in enumerate(data_arrays):
@@ -69,6 +71,7 @@ def elementwise_diff(data_arrays, sim_arrays, norm=True, comparison='linear',
         else: 
             print('Comparison must be linear or log.')
             return
+    #print('lendiffs', len(diffs))
     return diffs
 
 def slice_by_time(arrays, timearray, lowlim=None, hilim=None):
@@ -143,6 +146,8 @@ def simulate_and_compare(varparams, varparamkeys, system, data_arrays, to,
     roll_value : float, optional
         Value on ``to['array']`` to which maxima of aligned arrays will be 
         shifted to.
+    comparison : 'linear' or 'log'
+        see ``elementwise_diff`` function. Default is linear.
     absolute : boolean, optional
         see ``elementwise_diff`` function. Default is False.
     limits : list of 2 values, optional
@@ -261,7 +266,7 @@ def simulate_and_compare(varparams, varparamkeys, system, data_arrays, to,
     if condensed_output:
         return np.sum(diffs**2)
     else:
-        return diffs
+        return diffs.flatten()
 
 def sac_args(varparamkeys, system, data_arrays, to, 
                          light, powers=None, irf_fwhm=40*ps, N_coarse=500, roll_value=0, 

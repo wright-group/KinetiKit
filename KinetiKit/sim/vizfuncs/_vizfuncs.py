@@ -170,3 +170,69 @@ def HeteroViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p1
                 break
             
     return
+
+def FuncViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
+        p15, p16, p17, p18, p19, p20,
+        to=sim.time.linear(), N_coarse=500, power = 1e-6,
+        data=None, power_list=[1], power_unit='microWatt', 
+        align_by = 'steep', avgnum= 5, slidepower=False):
+    
+    args = p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,\
+        p15, p16, p17, p18, p19, p20,
+    param_names = system.params().keys()
+    trunc_args = args[:len(list(param_names))]
+    params = kin_kit.dict_from_list(trunc_args, param_names)
+    system.update(**params) # system is updated according to the parameters provided as *args
+    
+            
+    #--- Creating Time Array
+    dtime = to['array'][::to['subsample']]
+    
+    pl = system.PLsig(dtime)
+    
+    sims = sim.lib.convolve_irf(pl, dtime)  
+    
+    # Aligns data with sim either by max. or steep
+    if align_by == 'steep':
+        aligned_sims = kin_kit.align_by_steep(sims, dtime, value = 0.5*ns, avgnum=avgnum)
+    
+    elif align_by == 'max':
+        aligned_sims = kin_kit.align_by_max(sims, dtime, value = 0.5*ns, avgnum=avgnum)
+    else:
+        print('\'align_by\' must be \'steep\' or \'max\'')
+    aligned_sims = kin_kit.make_2d(aligned_sims)   
+    
+    fig=None
+    data_ended = False; sims_ended = False
+    for i in range(20):
+        if data is None:
+            pass
+        else:
+            data=kin_kit.make_2d(data)
+            try:
+                d = data[i]
+                fig=art.plot3scales.plot(dtime, d, sys_obj=None, t_dict=None,
+                         annotate=False, fig=fig, linewidth=1, 
+                         color=color_range[i],
+                         mlabel='data_%0.3f'%(power_list[i])
+                         )
+            except IndexError:
+                data_ended = True
+                pass
+                
+            try:
+                aligned_sim = aligned_sims[i]
+                art.plot3scales.plot(dtime, aligned_sim, system, t_dict=to, ivtype='none', 
+                                 annotate=True, fig=fig, ResetColorCyc=i==0, 
+                                 color=color_range[i],
+                                 linewidth=8, opaq=0.4,
+                                 mlabel='sim_%0.3f'%(power_list[i])
+                                 )
+            except IndexError:
+                sims_ended = True
+                pass
+            
+            if sims_ended and data_ended:
+                break
+            
+    return

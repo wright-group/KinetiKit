@@ -1,18 +1,18 @@
-k_ann,3916870870.5762525 
-k_dis,11584586173.706902 
-k_rec,45340.88114437195 
+k_ann,3463715686.442943 
+k_dis,8782688839.434652 
+k_rec,38812.194528090506 
 cs,0.5 
 Model type,Mono 
-Sum of Sq. of Residuals,0.07697883431608607 
-No. of DE Evaluations,1714 
-No. of DE Iterations,37 
-No. of LS Evaluations,21 
+Sum of Sq. of Residuals,0.030517212677876167 
+No. of DE Evaluations,1849 
+No. of DE Iterations,40 
+No. of LS Evaluations,17 
 k_ann_bounds,1000000.0, 10000000000.0 
 k_dis_bounds,5000000.0, 32000000000.0 
 k_rec_bounds,1000.0, 100000000.0 
-k_ann_error,35488064.201374926 
-k_dis_error,145136413.8146321 
-k_rec_error,1250.1210347036902 
+k_ann_error,18610934.943496488 
+k_dis_error,65079388.4925357 
+k_rec_error,730.3432680431371 
 comparison,linear 
 absolute,True 
 time_limits,None 

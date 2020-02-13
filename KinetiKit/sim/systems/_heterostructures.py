@@ -1,9 +1,9 @@
 import numpy as np
 import warnings
-
+from KinetiKit.sim.systems import RateModel
 warnings.filterwarnings("ignore", category=RuntimeWarning)
     
-class Hetero():
+class Hetero(RateModel):
     """
     Heterostructure of two adjacent systems, excitons, free carriers, and 
     transfer thereof. No trapping.
@@ -26,27 +26,7 @@ class Hetero():
     'k_htr': 1,
     }
     
-    def __init__(self, **kwargs):
-        params = self.default.copy(); params.update(kwargs)
-        self.name = self.class_name
-        
-        self.keys = params.keys()
-        self.k1_ann = params['k1_ann']
-        self.k1_dis = params['k1_dis']
-        self.k1_rec = params['k1_rec']
-        self.cs1 = params['cs1']
-
-        self.k2_ann = params['k2_ann']
-        self.k2_dis = params['k2_dis']
-        self.k2_rec = params['k2_rec']
-        self.cs2 = params['cs2']
-
-        self.k_xtr = params['k_xtr']
-        self.k_etr = params['k_etr']
-        self.k_htr = params['k_htr']
-
-        self.populations = ['1x', '1e', '1h', '2x', '2e', '2h']
-        self.popnum = len(self.populations)
+    populations = ['1x', '1e', '1h', '2x', '2e', '2h']
    
     def rate(self, N, photons):
         n1x, n1e, n1h, n2x, n2e, n2h = N
@@ -68,6 +48,7 @@ class Hetero():
                          n2h_rate])
 
     def PLsig(self, N):
+        # This produces two PL outputs - one for each part of the heterostructure
         out = np.zeros((2, N.shape[-1]))
         n1x = N[self.populations.index('1x')]
         n1e = N[self.populations.index('1e')]
@@ -79,11 +60,3 @@ class Hetero():
         out[1] = self.k2_ann * n2x + self.k2_rec * n2e * n2h
         return out
     
-    def update(self, **kwargs):
-        for key, val in kwargs.items():
-            if key in self.keys:
-                self.__setattr__(key,val)
-    
-    def params(self):
-        return {key: self.__getattribute__(key) for key in self.keys}
-		
