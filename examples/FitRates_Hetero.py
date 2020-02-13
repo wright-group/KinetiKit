@@ -264,4 +264,4 @@ def save_all():
     
 def plot_species(save=False):
     artists.plot3scales.show_species(dtime, [species_set], system, False, 
-                                     save=save, filename=key, destfolder=destpath)
+                                     save=save, filename=ouput_name, destfolder=destpath)

@@ -44,6 +44,8 @@ class FunctionModel:
         params = self.default.copy()
         params.update(kwargs)
         
+        self.name = self.class_name
+        
         self.keys = params.keys()
         for key, value in params.items():
             setattr(self, key, value)

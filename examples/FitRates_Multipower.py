@@ -83,28 +83,28 @@ See QUICK NOTES > Note on Setting and Fitting parameters in README file
 system = sim.systems.MonoRecX()
 
 initparams = {
-        'k_ann': 1e9,
-        'k_dis': 8e9,
-        'k_rec': 1e6,
+        'k_ann': 1.0e9,#1001463356.9975033,
+        'k_dis': 9e9,#9990872345.442875,
+        'k_rec': 5.299e7,#52987975.39923163,
         'cs': 0.5,
     }  
 
 bounds = {
         'k_ann': (1e7, 1e10),
-        'k_dis': (5e6, 1e10), 
-        'k_rec': (1e3, 1e8),
+        'k_dis': (1e9, 9.9e9), 
+        'k_rec': (1e5, 1e8),
         } 
 
 """
 Fitting preferences
 """
 doFit = True # if False, system will be modeled with initparams
-doLS = False # whether to refine the optimization via a local least-squares 
+doLS = True # whether to refine the optimization via a local least-squares 
             # fitting (and obtain error estimates). Ignore if doFit = False
 settings['display_counter'] = True # display counter showing search iteration
 
 #--- arguments of sim.fit.simulate_and_compare() -- see docstring
-comparison_type = 'linear' # "linear" of "log" comparison betw. data and sim.
+comparison_type = 'log' # "linear" of "log" comparison betw. data and sim.
 absolute = True # return avg. of absolute vs. relative differences
 norm = False # False recommended for simultaneous multi-power fitting;
             # see docstring
@@ -211,21 +211,23 @@ kin_kit.printparamsexp(fitparamdict, errordict) # display fit parameters
 system.update(**fitparamdict) # system updated with fit parameters
 species_sets = []
 for i, power in enumerate(pulse_powers):
-            print(power)
-            light = light.updated_with(pulse={'power':power})
-            transient, converged = sim.lib.refined_simulation(system, to, light,
-                                                      N_coarse=N_coarse)
-            species_sets.append(transient)
-            pl_at_this_power = system.PLsig(transient)
-            
-            if i == 0:
-                pl = pl_at_this_power
-            else:
-                pl = np.vstack((pl, pl_at_this_power))
+    light = light.updated_with(pulse={'power':power})
+    # print(i, 'pulse', light.pulse, 'cw', light.cw, 'numc', light.numcycles)
+    # print('system params', system.params(), 'time', to.items())
+    transient, converged = sim.lib.refined_simulation(system, to, light,
+                                              N_coarse=N_coarse)
+    # print(converged)
+    species_sets.append(transient)
+    pl_at_this_power = system.PLsig(transient)
+    
+    if i == 0:
+        pl = pl_at_this_power
+    else:
+        pl = np.vstack((pl, pl_at_this_power))
                 
 sims = sim.lib.convolve_irf(pl, dtime)   # PL signal convolved with IRF
-all_y = kin_kit.make_2d(all_y)
-sims = kin_kit.make_2d(sims)
+# all_y = kin_kit.make_2d(all_y)
+# sims = kin_kit.make_2d(sims)
 species_sets = np.array(species_sets)
 
 # alignment
