@@ -1,3 +1,6 @@
+"""
+Methods and tools used throughout the package, which do not pertain exclusively to data or simulation.
+"""
 from ._mathfuncs import *
 from ._alignment import *
 from ._savetools import *

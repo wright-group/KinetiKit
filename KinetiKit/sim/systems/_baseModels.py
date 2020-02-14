@@ -3,7 +3,7 @@ import warnings
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-__all__ = ['RateModel', 'FunctionModel']
+#__all__ = ['RateModel', 'FunctionModel']
 
 class RateModel:
     """

@@ -1,21 +1,18 @@
 """
-You can use a custom-built model on any of the example files, by including the 
-import process below, and, when defining the "system" in your code, replacing 
-sim.systems.<modelname> with myModels.<modelname>.
-
-Example folder structure for this to work:
-    
-SomeFolder
-|-- calling_a_custom_model.py
-|-- UserDefinedModels
-|   |-- custom_models.py
-|   |-- __init__.py
-|   |  | from custom_models import *
-
+You can use a custom-built model on any of the example files, by calling a 
+system from a different file in the same working directory. You will need to 
+explicitly import the models from their file:
 """
 
-import UserDefinedModels as myModels
+from custom_models import Triexp, MonoEEA
+"""
+If the above line does not work, make sure that the current working directory
+is the directory where the custom_models.py file is located.
+After importing the systems, you can call them by their name inside the file:
+"""
 
-system = myModels.Triexp()
-system.update(**{'A1':0.9, 'tau1': 1e10, 'tau2':1e8, 'offset':0.2})
-print(system.params())
+system1 = Triexp()
+print(system1.name, system1.keys)
+system2 = MonoEEA()
+print(system2.name, system2.keys)
+

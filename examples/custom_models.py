@@ -1,5 +1,8 @@
 """
 Example file a user of the program would write to define new models.
+To use such a file, you should place it in the same directory as the 
+main file that you edit to import and simulate data.
+
 """
 
 import numpy as np
