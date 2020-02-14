@@ -11,6 +11,6 @@ setup(
         "numpy>=1.15.0",
         "scipy",
     ],
-    version='0.1.2',
+    version='0.1.3',
     description="Tools for comparing and kinetically simulating time-resolved data",
 )
