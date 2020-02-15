@@ -200,9 +200,6 @@ def plot(x, y, sys_obj=None, t_dict=None, other_params=None, ivtype='none',
     # Figure parameters
     fw = 13; fh = 5
     
-    if not annotate:
-            fh *= 0.915
-    
     if fig is None:
         fresh_fig, (ax1, ax2, ax3) = plt.subplots(1,3, figsize=(fw, fh))
 
@@ -220,15 +217,12 @@ def plot(x, y, sys_obj=None, t_dict=None, other_params=None, ivtype='none',
     ax3.set_xlim(0.1, 12.5)
     ax3.set_xscale('log')
     ax3.set_yscale('log')
-    fresh_fig.subplots_adjust(bottom=0.7)
+    
         
     if norm:
         ax1.set_ylim(-5, 105)
         ax2.set_ylim(0.001, 120) #0.001
         ax3.set_ylim(0.001, 120)
-    
-    if annotate:
-        plt.subplots_adjust(bottom=0.202)
         
     if offset is None:
         offset = [0, 0 , 0 ]
