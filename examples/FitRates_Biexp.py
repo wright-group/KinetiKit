@@ -180,7 +180,7 @@ kin_kit.printparamsexp(fitparamdict) # display fit parameters
 
 system.update(**fitparamdict)
 pl, converged = sim.lib.simulate_func(system, dtime)
-sims = sim.lib.convolve_irf(pl, dtime)   
+sims = sim.lib.convolve_irf(pl, dtime, fwhm=irf_fwhm)   
 
 # Aligns data with sim either by max. or steep
 if roll_criterion == 'max':
