@@ -225,7 +225,7 @@ for i, power in enumerate(pulse_powers):
     else:
         pl = np.vstack((pl, pl_at_this_power))
                 
-sims = sim.lib.convolve_irf(pl, dtime)   # PL signal convolved with IRF
+sims = sim.lib.convolve_irf(pl, dtime, fwhm=irf_fwhm)    # PL signal convolved with IRF
 # all_y = kin_kit.make_2d(all_y)
 # sims = kin_kit.make_2d(sims)
 species_sets = np.array(species_sets)
