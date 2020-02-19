@@ -220,7 +220,7 @@ system.update(**fitparamdict) # system updated with fit parameters
 transient, converged = sim.lib.refined_simulation(system, to, light) # system re-simulated with fit parameters
 species_set = transient # set of population's time evolution
 pl = system.PLsig(transient) # PLsig function applied to population arrays
-sims = sim.lib.convolve_irf(pl, dtime)   # PL signal convolved with IRF
+sims = sim.lib.convolve_irf(pl, dtime, fwhm=irf_fwhm)    # PL signal convolved with IRF
 
 # alignment
 if roll_criterion == 'max':
