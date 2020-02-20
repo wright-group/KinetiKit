@@ -69,10 +69,14 @@ N_coarse = 500 # number of time points for coarse simulation
 align_to = 0.5*ns # value to which data and simulation are aligned for saving
 
 """
-Define Instrument Response Function FWHM (Note: currently, only simulated
+Define Instrument Response Function (Note: currently, only simulated
 FWHM are supported)
 """
-irf_fwhm = 40*ps
+irf_fwhm = 50*ps
+diffusion_tail = True # whether to simulate IRF with a diffusion tail
+# Ignore following if diffusion_tail is False
+tail_amplitude = 0.02 # amplitude of IRF tail relative to IRF peak
+tail_lifetime = 0.85*ns # lifetime of diffusion tail
 
 """
 Choose System type, Initial parameters, and search boundaries. 
@@ -148,6 +152,13 @@ light = sim.lib.Excitation(pulse={'power':pulse_power,
                                   'fwhm' : pulse_fwhm,
                                   'wavelength': pulse_wavelength})
 
+# Compiling IRF arguments:
+irf_args = {'fwhm': irf_fwhm, 
+            'diff': diffusion_tail,
+            'ampl': tail_amplitude,
+            'lifetime': tail_lifetime
+            }
+
 # Conditions for fitting algorithm
 conditions = fit.lib.sac_args(
         varparamkeys=bounds.keys(),
@@ -155,7 +166,7 @@ conditions = fit.lib.sac_args(
         data_arrays = all_y,
         to = to,
         light = light,
-        irf_fwhm = irf_fwhm,
+        irf_args = irf_args,
         N_coarse = N_coarse,  
         comparison=comparison_type, # 'linear' or 'log'
         absolute=absolute,
@@ -204,7 +215,7 @@ system.update(**fitparamdict) # system updated with fit parameters
 transient, converged = sim.lib.refined_simulation(system, to, light) # system re-simulated with fit parameters
 species_set = transient # set of population's time evolution
 pl = system.PLsig(transient) # PLsig function applied to population arrays
-sims = sim.lib.convolve_irf(pl, dtime)   # PL signal convolved with IRF
+sims = sim.lib.convolve_irf(pl, dtime, **irf_args)   # PL signal convolved with IRF
 
 # alignment
 if roll_criterion == 'max':
