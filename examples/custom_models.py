@@ -13,7 +13,7 @@ warnings.filterwarnings("ignore", category=RuntimeWarning) #use this to avoid an
 
 class MonoEEA(RateModel):
     """
-    Single (monolithic) system, excitons, NO free carriers, exciton-exciton 
+    Single (monolithic) system, excitons, free carriers, exciton-exciton 
     annihilation possible.
     """
     
