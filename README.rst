@@ -1,7 +1,7 @@
 KinetiKit
 ---------
 
-INSTALLATION INSRUCTIONS:
+INSTALLATION INSTRUCTIONS:
 
 The latest releases of this package can be found on PyPI: https://pypi.org/project/KinetiKit/. 
 An Anaconda Python installation is recommended: https://www.anaconda.com/distribution/
