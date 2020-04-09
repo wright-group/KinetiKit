@@ -102,7 +102,7 @@ def MonoViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
 
 def HeteroViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
         p15, p16, p17, p18, p19, p20,
-        to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_whm = 50*ps, 
+        to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_fwhm = 50*ps, 
         data=None, power_unit='microWatt', ids = ['layer 1', 'layer 2'],
         align_by = 'steep', avgnum= 5):
     
