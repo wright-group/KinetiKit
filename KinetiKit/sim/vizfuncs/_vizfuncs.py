@@ -12,12 +12,12 @@ from KinetiKit import sim
 from KinetiKit import artists as art
 from KinetiKit.artists.plotparams import colors as color_range
 from KinetiKit import kit as kin_kit
-from KinetiKit.units import units, ns
+from KinetiKit.units import units, ns, ps
 
 
 def MonoViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
         p15, p16, p17, p18, p19, p20,
-        to=sim.time.linear(), N_coarse=500, power = 1e-6,
+        to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_whm = 50*ps,
         data=None, power_list=[1], power_unit='microWatt', 
         align_by = 'steep', avgnum= 5, slidepower=False):
     
@@ -54,7 +54,7 @@ def MonoViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
             else:
                 pl = np.vstack((pl, pl_at_this_power))
                 
-    sims = sim.lib.convolve_irf(pl, dtime)   
+    sims = sim.lib.convolve_irf(pl, dtime, fwhm=irf_fwhm)   
     # Aligns data with sim either by max. or steep
     if align_by == 'steep':
         aligned_sims = kin_kit.align_by_steep(sims, dtime, value = 0.5*ns, avgnum=avgnum)
@@ -102,7 +102,7 @@ def MonoViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
 
 def HeteroViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
         p15, p16, p17, p18, p19, p20,
-        to=sim.time.linear(), N_coarse=500, power = 1e-6,
+        to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_whm = 50*ps, 
         data=None, power_unit='microWatt', ids = ['layer 1', 'layer 2'],
         align_by = 'steep', avgnum= 5):
     
@@ -122,7 +122,7 @@ def HeteroViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p1
     transient, converged = sim.lib.refined_simulation(system, to, light,
                                                   N_coarse=N_coarse)
     pl = kin_kit.make_2d(system.PLsig(transient))
-    sims = sim.lib.convolve_irf(pl, dtime)   
+    sims = sim.lib.convolve_irf(pl, dtime, fwhm=irf_fwhm)   
     
     # Aligns data with sim either by max. or steep
     if align_by == 'steep':
@@ -173,7 +173,7 @@ def HeteroViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p1
 
 def FuncViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
         p15, p16, p17, p18, p19, p20,
-        to=sim.time.linear(), N_coarse=500, power = 1e-6,
+        to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_fwhm=50*ps,
         data=None, power_list=[1], power_unit='microWatt', 
         align_by = 'steep', avgnum= 5, slidepower=False):
     
@@ -190,7 +190,7 @@ def FuncViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
     
     pl = system.PLsig(dtime)
     
-    sims = sim.lib.convolve_irf(pl, dtime)  
+    sims = sim.lib.convolve_irf(pl, dtime, fwhm=irf_fwhm)  
     
     # Aligns data with sim either by max. or steep
     if align_by == 'steep':
