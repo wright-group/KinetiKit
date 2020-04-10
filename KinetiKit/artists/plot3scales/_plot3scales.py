@@ -405,7 +405,7 @@ def find_max_value(axis, which='y'):
             local_max = line.get_ydata().max()
             local_idx = np.argmax(line.get_ydata())
         else:
-            local_max - line.get_xdata().max()
+            local_max = line.get_xdata().max()
             local_idx = np.argmax(line.get_xdata())
         # Step 2: check it against the current global minimum
         if local_max > global_max:

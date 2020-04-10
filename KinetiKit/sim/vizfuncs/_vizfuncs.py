@@ -17,7 +17,7 @@ from KinetiKit.units import units, ns, ps
 
 def MonoViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
         p15, p16, p17, p18, p19, p20,
-        to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_whm = 50*ps,
+        to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_fwhm = 50*ps,
         data=None, power_list=[1], power_unit='microWatt', 
         align_by = 'steep', avgnum= 5, slidepower=False, xmin=0.1, xmax=None, 
         ymin=1e-3, ymax=1.2):
@@ -78,8 +78,9 @@ def MonoViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
                 fig=art.plot3scales.plot(dtime, d, sys_obj=None, t_dict=None,
                          annotate=False, fig=fig, linewidth=1, 
                          color=color_range[i],
-                         mlabel='data_%0.3f'%(power_list[i])
-                         )
+                         mlabel='data_%0.3f'%(power_list[i]),
+                         xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+                         
             except IndexError:
                 data_ended = True
                 pass
@@ -178,7 +179,8 @@ def FuncViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
         p15, p16, p17, p18, p19, p20,
         to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_fwhm=50*ps,
         data=None, power_list=[1], power_unit='microWatt', 
-        align_by = 'steep', avgnum= 5, slidepower=False):
+        align_by = 'steep', avgnum= 5, slidepower=False,
+        xmin=0.1, xmax=None, ymin=1e-3, ymax=1.2):
     
     args = p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,\
         p15, p16, p17, p18, p19, p20,
@@ -217,7 +219,8 @@ def FuncViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
                 fig=art.plot3scales.plot(dtime, d, sys_obj=None, t_dict=None,
                          annotate=False, fig=fig, linewidth=1, 
                          color=color_range[i],
-                         mlabel='data_%0.3f'%(power_list[i])
+                         mlabel='data_%0.3f'%(power_list[i]),
+                         xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax
                          )
             except IndexError:
                 data_ended = True
@@ -229,7 +232,8 @@ def FuncViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
                                  annotate=True, fig=fig, ResetColorCyc=i==0, 
                                  color=color_range[i],
                                  linewidth=8, opaq=0.4,
-                                 mlabel='sim_%0.3f'%(power_list[i])
+                                 mlabel='sim_%0.3f'%(power_list[i]),
+                                 xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax
                                  )
             except IndexError:
                 sims_ended = True
