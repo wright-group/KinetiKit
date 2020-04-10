@@ -12,7 +12,7 @@ def plot(x, y, sys_obj=None, t_dict=None, other_params=None, ivtype='none',
          ivkey='k_ann', unit='ns', offset=None, norm=True, 
          fig=None, annotate=True, ResetColorCyc=False, 
          opaq=1, IgnoreLabel=False, mlabel=None, color=None,
-         markers=False, linewidth=None):
+         markers=False, linewidth=None, xmin=None, xmax=None, ymin=None, ymax=None):
     """
     A versatile function for plotting series of data or simulations on three
     scale types: linear, log-linear, and log-log. It contains several arguments
@@ -206,27 +206,10 @@ def plot(x, y, sys_obj=None, t_dict=None, other_params=None, ivtype='none',
     else:
         fresh_fig = fig
         (ax1, ax2, ax3) = fig.axes
-        
     
-    ax1.set_title('linear')
-    ax1.set_xlim(0, 12.5)
-    ax2.set_title('log-linear')
-    ax2.set_xlim(0, 12.5)
-    ax2.set_yscale('log')
-    ax3.set_title("log-log")
-    ax3.set_xlim(0.1, 12.5)
-    ax3.set_xscale('log')
-    ax3.set_yscale('log')
-    
-        
-    if norm:
-        ax1.set_ylim(-5, 105)
-        ax2.set_ylim(0.001, 120) #0.001
-        ax3.set_ylim(0.001, 120)
-        
     if offset is None:
         offset = [0, 0 , 0 ]
-    
+
     for i, ax in enumerate([ax1, ax2, ax3]):
         
         if ResetColorCyc:
@@ -258,11 +241,11 @@ def plot(x, y, sys_obj=None, t_dict=None, other_params=None, ivtype='none',
 
         else:
             if markers:
-                ax.plot(xoff, kin_kit.normalized(y) * 100, 'o', ms=4, 
+                ax.plot(xoff, kin_kit.normalized(y), 'o', ms=4, 
                         mfc=ax.get_facecolor(),
                         color=color, label=label, alpha=opaq)
             else:
-                ax.plot(xoff, kin_kit.normalized(y) * 100, 
+                ax.plot(xoff, kin_kit.normalized(y), 
                     color=color, label=label, alpha=opaq, linewidth=linewidth)
 
         if fig is None:
@@ -274,6 +257,43 @@ def plot(x, y, sys_obj=None, t_dict=None, other_params=None, ivtype='none',
                 
         leg = ax1.legend(title=leg_title, fontsize=8, loc=1)
         plt.setp(leg.get_title(), fontsize=10)
+    
+    if xmin is None:
+        xmin = 0.1
+    if xmax is None:
+        xmax = max(x)/unit_value
+    
+    ax1.set_xlim(0, xmax)
+    ax2.set_xlim(0, xmax) 
+    ax3.set_xlim(xmin, xmax)
+    
+    if norm:
+        if ymax is None:
+            ymax = 1.20
+        if ymin is None:
+            ymin = 0.001
+            
+        ax1.set_ylim(-0.05, 1.05)
+        ax2.set_ylim(ymin, ymax) #0.001
+        ax3.set_ylim(ymin, ymax)
+    
+    else:
+        # set default ymax, ymin according to data limits
+        if ymax is None: 
+            # check if previously plotted trace has a higher maximum; 
+            # if not, replace the current ymax with max(y)
+            ymax = max([max(y), find_max_value(ax2)[1]])
+        if ymin is None:                
+            # analogous check for ymin
+            ymin = min([min(y), find_min_value(ax2)[1]])
+            
+        ax1.set_ylim(-0.05*(ymax-ymin), 1.05*ymax)
+        ax2.set_ylim(0.1*ymin, 2*ymax)
+        ax3.set_ylim(0.1*ymin, 2*ymax)
+    
+    ax2.set_yscale('log')
+    ax3.set_xscale('log')
+    ax3.set_yscale('log')
     
     if fig is None:
         fresh_fig.tight_layout()
@@ -308,3 +328,98 @@ def show_species(time, species_sets, system, norm, save=False, filename=None, de
     
     if save:
         kin_kit.save_species(filename, destfolder, norm=norm)
+        
+def find_min_value(axis, which='y'):
+    """
+    Finds and returns the minimum y value among all plotted traces in an axis
+    object.
+    
+    
+    Parameters:
+    -----------
+    axis : axis object
+        The axis (plot) of which we are trying to obtain the minimum value
+    which : string, 'x' or 'y', optional
+        Whether to look for the minimum x or y value. Default is y
+    
+    Returns:
+    --------
+    datapoint : tuple
+        The x and y value of the found datapoint. Warning: if the minimum y 
+        value is sought but there are multiple occurences of the same minimum 
+        value, this function will return an x,y tuple where the x value 
+        corresponds to the FIRST occurence of the minimum y value.
+    
+    """
+    global_min = np.inf
+    global_idx = None
+    global_line = None
+    
+    lines = axis.lines
+    
+    if len(lines) == 0:
+        return (np.inf, np.inf)
+    
+    for line in lines:
+        # Step 1: find the local minimum of each line
+        if which == 'y':
+            local_min = line.get_ydata().min()
+            local_idx = np.argmin(line.get_ydata())
+        else:
+            local_min - line.get_xdata().min()
+            local_idx = np.argmin(line.get_xdata())
+        # Step 2: check it against the current global minimum
+        if local_min < global_min:
+            global_min = local_min
+            global_idx = local_idx
+            global_line = line
+        # Step 3: repeat for all lines
+    
+    # Step 4: Generate tuple
+    if which == 'y':
+        x_val = global_line.get_xdata()[global_idx]
+        y_val = global_min
+    else:
+        x_val = global_min
+        y_val = global_line.get_ydata()[global_idx]
+    return x_val, y_val
+
+def find_max_value(axis, which='y'):
+    """
+    Exact analogue of ``find_min_value()`` function, but for obtaining the 
+    global maximum of the plots in a given axis object.
+    
+    """
+    global_max = -np.inf
+    global_idx = None
+    global_line = None
+    
+    lines = axis.lines
+    
+    if len(lines) == 0:
+        return (-np.inf, -np.inf)
+    
+    for line in lines:
+        # Step 1: find the local minimum of each line
+        if which == 'y':
+            local_max = line.get_ydata().max()
+            local_idx = np.argmax(line.get_ydata())
+        else:
+            local_max - line.get_xdata().max()
+            local_idx = np.argmax(line.get_xdata())
+        # Step 2: check it against the current global minimum
+        if local_max > global_max:
+            global_max = local_max
+            global_idx = local_idx
+            global_line = line
+        # Step 3: repeat for all lines
+    
+    # Step 4: Generate tuple
+    if which == 'y':
+        x_val = global_line.get_xdata()[global_idx]
+        y_val = global_max
+    else:
+        x_val = global_max
+        y_val = global_line.get_ydata()[global_idx]
+    return x_val, y_val
+    

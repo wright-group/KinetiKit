@@ -19,7 +19,8 @@ def MonoViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
         p15, p16, p17, p18, p19, p20,
         to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_whm = 50*ps,
         data=None, power_list=[1], power_unit='microWatt', 
-        align_by = 'steep', avgnum= 5, slidepower=False):
+        align_by = 'steep', avgnum= 5, slidepower=False, xmin=0.1, xmax=None, 
+        ymin=1e-3, ymax=1.2):
     
     args = p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,\
         p15, p16, p17, p18, p19, p20,
@@ -89,8 +90,9 @@ def MonoViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
                                  annotate=True, fig=fig, ResetColorCyc=i==0, 
                                  color=color_range[i],
                                  linewidth=8, opaq=0.4,
-                                 mlabel='sim_%0.3f'%(power_list[i])
-                                 )
+                                 mlabel='sim_%0.3f'%(power_list[i]),
+                                 xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+                                 
             except IndexError:
                 sims_ended = True
                 pass
@@ -104,7 +106,7 @@ def HeteroViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p1
         p15, p16, p17, p18, p19, p20,
         to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_fwhm = 50*ps, 
         data=None, power_unit='microWatt', ids = ['layer 1', 'layer 2'],
-        align_by = 'steep', avgnum= 5):
+        align_by = 'steep', avgnum= 5, xmin=0.1, xmax=None, ymin=1e-3, ymax=1.2):
     
     args = p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,\
         p15, p16, p17, p18, p19, p20,
@@ -159,9 +161,10 @@ def HeteroViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p1
                 art.plot3scales.plot(dtime, aligned_sim, system, t_dict=to, ivtype='none', 
                                  annotate=True, fig=fig, ResetColorCyc=i==0, 
                                  color=color_range[i],
-                                 linewidth=8, opaq=0.4,
-                                 mlabel='sim_%s'%(ids[i])
-                                 )
+                                 linewidth=8, opaq=0.4, 
+                                 mlabel='sim_%s'%(ids[i]),
+                                 xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+                
             except IndexError:
                 sims_ended = True
                 pass
