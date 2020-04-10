@@ -366,7 +366,7 @@ def find_min_value(axis, which='y'):
             local_min = line.get_ydata().min()
             local_idx = np.argmin(line.get_ydata())
         else:
-            local_min - line.get_xdata().min()
+            local_min = line.get_xdata().min()
             local_idx = np.argmin(line.get_xdata())
         # Step 2: check it against the current global minimum
         if local_min < global_min:
