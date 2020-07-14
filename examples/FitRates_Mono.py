@@ -96,7 +96,7 @@ bounds = {
 """
 Fitting preferences
 """
-doFit = True # if False, system will be modeled with initparams
+doFit = False # if False, system will be modeled with initparams
 doLS = True # whether to refine the optimization via a local least-squares 
             # fitting (and obtain error estimates). Ignore if doFit = False
 settings['display_counter'] = True # display counter showing search iteration

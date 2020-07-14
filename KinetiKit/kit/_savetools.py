@@ -128,6 +128,9 @@ def save_fit(filename, traces={}, params={}, destinationfolder=''):
     and increase that number if the filename already exists
     """
     
+    if not os.path.exists(destinationfolder):
+        os.makedirs(destinationfolder)
+        
     od = os.path.join(destinationfolder, filename) + '_fit'
     
     for i in np.arange(0,500,1):
@@ -152,6 +155,9 @@ def save_species(filename, destinationfolder='', norm=False):
     function will add the number 1 to the end of the provided filename,
     and increase that number if the filename already exists
     """
+    
+    if not os.path.exists(destinationfolder):
+        os.makedirs(destinationfolder)
     
     od = os.path.join(destinationfolder, filename) + '_fit'
     

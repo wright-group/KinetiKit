@@ -1,8 +1,11 @@
+"""
+
+"""
 import matplotlib
 import matplotlib.pyplot as plt
-from ctypes import windll
+# from ctypes import windll
 
-sdpi = windll.user32.GetDpiForSystem()
+# sdpi = windll.user32.GetDpiForSystem()
 
 plt.style.use('bmh')
 matplotlib.rcParams['axes.prop_cycle'] = matplotlib.cycler('color', ['E24A33', '348ABD', '988ED5', '8EBA42', 'FBC15E', '777777', 'FFB5B8'])
@@ -14,7 +17,7 @@ matplotlib.rcParams['axes.prop_cycle'] = matplotlib.cycler('color', ['E24A33', '
                    # 777777 : gray
                    # FFB5B8 : pink
 
-matplotlib.rcParams['figure.dpi'] = sdpi
+# matplotlib.rcParams['figure.dpi'] = sdpi
 matplotlib.rcParams['savefig.dpi'] = 800
 matplotlib.rcParams['font.size'] = 10
 matplotlib.rcParams['markers.fillstyle'] = 'none'

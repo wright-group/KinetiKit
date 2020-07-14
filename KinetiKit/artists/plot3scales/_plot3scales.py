@@ -91,11 +91,24 @@ def plot(x, y, sys_obj=None, t_dict=None, other_params=None, ivtype='none',
         If not None, this setting will override the color set by the color cycle.
     markers : Boolean
         If True, the trace is plotted as markers instead of a continuous line.
+    linewidth : float or None
+        Default None. If specified, defines the line width of the plotted trace.
+    xmin : float or None
+        Default is`None`, which uses the lower limit of the time axis `x`. Defines
+        the lower x-limit of the plot.
+    xmax : float or None
+        Analogous to xmin but for upper x limit of the plot.
+    ymin : float or None
+        Determines the lower y-limit of the plot. If `None`, ymin defaults to 
+        0.001 if `norm=True`, or takes the y-limits of the input array `y`, if
+        `norm=False`.
+    ymax : float or None
+        Analogous to ymin. If `None` and `norm=True`, the y-limit will be 1.20.
     
     Returns
     -------
-    A figure containing a set of plots represented on a linear, log-linear,
-    and log-log scale.
+    A figure (or a plot on an existing figure) containing a set of plots 
+    represented on a linear, log-linear, and log-log scale.
     """
     
     if sys_obj is None:

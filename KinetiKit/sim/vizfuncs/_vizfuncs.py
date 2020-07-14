@@ -18,8 +18,8 @@ from KinetiKit.units import units, ns, ps
 def MonoViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
         p15, p16, p17, p18, p19, p20,
         to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_fwhm = 50*ps,
-        data=None, power_list=[1], power_unit='microWatt', 
-        align_by = 'steep', avgnum= 5, slidepower=False, xmin=0.1, xmax=None, 
+        data=None, power_unit='microWatt', 
+        align_by = 'steep', avgnum= 5, xmin=0.1, xmax=None, 
         ymin=1e-3, ymax=1.2):
     
     args = p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,\
@@ -28,22 +28,21 @@ def MonoViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
     trunc_args = args[:len(list(param_names))]
     params = kin_kit.dict_from_list(trunc_args, param_names)
     system.update(**params) # system is updated according to the parameters provided as *args
-    
-    if isinstance(power_list, np.float) or isinstance(power_list, np.int):
-        power_list = [power_list]
-        
+           
     #--- Creating Time Array
     dtime = to['array'][::to['subsample']]
     
-    if slidepower:
+    if isinstance(power, np.float) or isinstance(power, np.int):
+        power_list = [power]
         power *= units[power_unit]
         light = sim.lib.Excitation(pulse={'power' : power})
         transient, converged = sim.lib.refined_simulation(system, to, light,
                                                   N_coarse=N_coarse)
         pl = system.PLsig(transient)
     
-    else:
-        for i, power in enumerate(power_list):
+    elif isinstance(power, list):
+        power_list = power
+        for i, power in enumerate(power):
             power *= units[power_unit]
             light = sim.lib.Excitation(pulse={'power' : power})
             transient, converged = sim.lib.refined_simulation(system, to, light,
