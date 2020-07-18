@@ -4,6 +4,9 @@ from setuptools import setup, find_packages
 
 setup(
     name="KinetiKit",
+	version="0.1.5",
+	author="Natalia Spitha",
+	author_email="natalia.spitha@gmail.com",
     packages=find_packages(exclude=("tests", "tests.*")),
     python_requires=">=3.6",
     install_requires=[
@@ -11,6 +14,5 @@ setup(
         "numpy>=1.15.0",
         "scipy",
     ],
-    version='0.1.5',
     description="Tools for comparing and kinetically simulating time-resolved data",
 )
