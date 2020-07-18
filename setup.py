@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="KinetiKit",
-	version="0.1.5",
+	version="0.1.6",
 	author="Natalia Spitha",
 	author_email="natalia.spitha@gmail.com",
     packages=find_packages(exclude=("tests", "tests.*")),
@@ -13,6 +13,7 @@ setup(
         "matplotlib>=3.0",
         "numpy>=1.15.0",
         "scipy",
+		"ipywidgets",
     ],
     description="Tools for comparing and kinetically simulating time-resolved data",
 )
