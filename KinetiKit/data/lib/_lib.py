@@ -71,7 +71,8 @@ class data_from_SPCM(object):
     def __init__(self, filename, key=None, time_unit='ns', coll=1,
                  metadata=False, weigh_by_coll=True, 
                  pulse_power=None, cw_power=None, wavelength=None,
-                 delimiter=',', unpack=True, skip_h=10, skip_f=1):
+                 delimiter=',', unpack=True, skip_h=10, skip_f=1,
+                 autocrop=False):
         
         self.filename = filename
         self.time_unit = time_unit
@@ -86,10 +87,19 @@ class data_from_SPCM(object):
         # If aquisition information was included in file, this part extracts
         # the aquisition time:
         if metadata:
+            skip_h = 210
+            skip_f = 1 
             with open(self.filename) as file:
-                line_col = file.readlines()[45]
-                self.coll = float(line_col.split(',')[2].split(']')[0])
-    
+                SYS_PAR = file.readlines()[10:169]
+            tac_ll = get_spcm_param(SYS_PAR[26])
+            tac_lh = get_spcm_param(SYS_PAR[27])
+            adc_res = get_spcm_param(SYS_PAR[30])
+            self.coll = get_spcm_param(SYS_PAR[35])
+            
+            if autocrop:
+                skip_h += int(adc_res*(100-tac_lh)/100)
+                skip_f += int(adc_res*tac_ll/100)
+            
         else:
             self.coll = coll
                 
@@ -227,3 +237,19 @@ class data_from_SPCM(object):
         return copy.deepcopy(self)
         
         
+def get_spcm_param(line, return_name = False):
+    param_name, ds, value = line.split('[')[1].split(']')[0].split(',')
+    if ds == 'I': #integer type
+        val = int(value)
+    elif ds == 'B': # boolean type
+        val = value == 1
+    elif ds == 'F': # float type
+        val = float(value)
+    else:
+        val = value
+    
+    if return_name:
+        return param_name, val
+    else:
+        return val
+    
