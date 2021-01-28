@@ -20,5 +20,6 @@ __all__ = ['Gauss',
            'precision',
            'printparamsexp',
            'roll_by_array_shift',
+           'find_baseline',
            'save_fit',
            'traces_to_csv']

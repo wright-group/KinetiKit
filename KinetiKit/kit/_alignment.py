@@ -193,3 +193,24 @@ def align_by_steep(arrays, refarray_x, refarray_y=None, avgnum=3, value=0):
     rolled_arrays = np.roll(rolled_arrays, -shift_idx, axis=-1)
         
     return rolled_arrays
+    
+def find_baseline(y, avgnum=50):
+    """
+    Returns the baseline value of a time-resolved trace by assuming that the 
+    baseline is also the least steep point.
+    """
+    
+    diffs = np.zeros(len(y))
+    for i in range(len(y)-1):
+        for k in range(avgnum):
+            if k == 0:
+                total_diff = y[i]-y[i-1]
+            else:
+                new_diff = y[i-k] - y[i-k-1]
+                total_diff = total_diff + new_diff
+        avg_diff = total_diff/avgnum
+        diffs[i+1] = avg_diff
+        
+    i_min = np.argmin(diffs[diffs!=0])
+    # print(i_min, y[i_min])
+    return y[i_min]
