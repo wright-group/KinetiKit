@@ -185,22 +185,22 @@ def refined_simulation(RE_set, t_obj, light_obj, N_coarse=500, doubleSearch=Fals
     
     #N_fine = t_obj['N']
     to_coarse = sim.time.update_linear(t_obj, **{'N' : N_coarse})
-    tc_start = time.clock()
+    tc_start = time.process_time()
     coarse_sim, converged = simulate_until_steady(RE_set, to_coarse, light_obj)
     coarse_p0 = coarse_sim.transpose()[np.argmin(coarse_sim[0])]
-    tc_end = time.clock()
+    tc_end = time.process_time()
     
     if (coarse_p0==-1).any(): # checks if coarse simulation led to "toofast" conditions
         #print('Did not refine simulation')
         return np.zeros((len(coarse_p0), t_obj['N'])), converged
     to_fine = t_obj
     
-    tf_start = time.clock()
+    tf_start = time.process_time()
     if doubleSearch:
         fine_sim, converged = simulate_until_steady(RE_set, to_fine, light_obj, p0=coarse_p0)
     else: 
         fine_sim = simulate(coarse_p0, RE_set, to_fine, light_obj)
-    tf_end = time.clock()
+    tf_end = time.process_time()
     
     #print('Coarse time (s):', tc_end-tc_start)
     #print('Fine time (s):', tf_end-tf_start)
