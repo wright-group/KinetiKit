@@ -17,7 +17,7 @@ from KinetiKit.units import units, ns, ps
 
 def MonoViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
         p15, p16, p17, p18, p19, p20,
-        to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_fwhm = 50*ps,
+        to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_args = {},
         data=None, power_unit='microWatt', 
         align_by = 'steep', avgnum= 5, xmin=0.1, xmax=None, 
         ymin=1e-3, ymax=1.2):
@@ -54,7 +54,7 @@ def MonoViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
             else:
                 pl = np.vstack((pl, pl_at_this_power))
                 
-    sims = sim.lib.convolve_irf(pl, dtime, fwhm=irf_fwhm)   
+    sims = sim.lib.convolve_irf(pl, dtime, irf_args)   
     # Aligns data with sim either by max. or steep
     if align_by == 'steep':
         aligned_sims = kin_kit.align_by_steep(sims, dtime, value = 0.5*ns, avgnum=avgnum)
@@ -104,7 +104,7 @@ def MonoViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
 
 def HeteroViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
         p15, p16, p17, p18, p19, p20,
-        to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_fwhm = 50*ps, 
+        to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_args = {}, 
         data=None, power_unit='microWatt', ids = ['layer 1', 'layer 2'],
         align_by = 'steep', avgnum= 5, xmin=0.1, xmax=None, ymin=1e-3, ymax=1.2):
     
@@ -113,8 +113,7 @@ def HeteroViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p1
     param_names = system.params().keys()
     trunc_args = args[:len(list(param_names))]
     params = kin_kit.dict_from_list(trunc_args, param_names)
-    system.update(**params) # system is updated according to the parameters provided as *args
-            
+    system.update(**params) # system is updated according to the parameters provided as *args    
     #--- Creating Time Array
     dtime = to['array'][::to['subsample']]
     
@@ -124,7 +123,7 @@ def HeteroViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p1
     transient, converged = sim.lib.refined_simulation(system, to, light,
                                                   N_coarse=N_coarse)
     pl = kin_kit.make_2d(system.PLsig(transient))
-    sims = sim.lib.convolve_irf(pl, dtime, fwhm=irf_fwhm)   
+    sims = sim.lib.convolve_irf(pl, dtime, irf_args)   
     
     # Aligns data with sim either by max. or steep
     if align_by == 'steep':
@@ -176,7 +175,7 @@ def HeteroViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p1
 
 def FuncViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
         p15, p16, p17, p18, p19, p20,
-        to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_fwhm=50*ps,
+        to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_args={},
         data=None, power_list=[1], power_unit='microWatt', 
         align_by = 'steep', avgnum= 5, slidepower=False,
         xmin=0.1, xmax=None, ymin=1e-3, ymax=1.2):
@@ -194,7 +193,7 @@ def FuncViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
     
     pl = system.PLsig(dtime)
     
-    sims = sim.lib.convolve_irf(pl, dtime, fwhm=irf_fwhm)  
+    sims = sim.lib.convolve_irf(pl, dtime, irf_args)  
     
     # Aligns data with sim either by max. or steep
     if align_by == 'steep':

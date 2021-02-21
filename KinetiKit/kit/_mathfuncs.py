@@ -7,6 +7,7 @@ import os
 import csv
 
 import numpy as np
+from scipy import special
 import matplotlib.pyplot as plt
 
 def normalized(ar, alert=True):
@@ -110,3 +111,32 @@ def Gauss(t, a, t0, fwhm):
     sigma = fwhm/(2*np.sqrt(2*np.log(2)))
     gauss = a * np.exp(-(t - t0)**2 / (2 * sigma**2))
     return gauss
+
+def ExpGauss(t, t0, a, fwhm, tau, b):
+    """ uses empirically determined exponentially weighted Gaussians to construct IRF"""
+    k = 1/tau # rate of exponential decay
+    sigma = fwhm/(2*np.sqrt(2*np.log(2)))
+    arg1 = k/2*(2*t0 + k*sigma**2 - 2*t)
+    arg2 = (t0 + k*sigma**2 - t) / (np.sqrt(2)*sigma)
+    
+    one = np.exp(arg1)
+    two = special.erfc(arg2)
+    return a * k/2 * one * two + b
+
+def GaussDiff(t, t0, a, fwhm, tau, b, c, weighted, tau_wt):
+    """ creates n Exponentially weighted Gaussian IRF with a diffusion tail"""
+    if weighted == False:
+        arg1 = Gauss(t, 1, t0, fwhm)
+    else:
+        arg1 = ExpGauss(t, t0, 1, fwhm, tau_wt, b=0)
+    arg2 = np.exp(-(t-t0)/tau)
+    for i, y in enumerate(arg2):
+        if t[i] < t0:
+            arg2[i] = 0 
+    y = np.zeros(len(arg1))
+    arg1 /= np.max(arg1)    
+    for i in range(len(y)):
+        y[i] = np.max([a*arg1[i], a*b*arg2[i]])
+    c *=np.max(y)
+    y[y<c] = c
+    return y 
