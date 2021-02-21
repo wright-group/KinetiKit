@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 from KinetiKit.units import units, MHz, fs, nm, uW, ps
 import KinetiKit.kit as kin_kit
 
-__all__ = ['convolve_irf']
+__all__ = ['convolve_irf', 'build_irf']
 
 # --- IRF Functions
 def convolve_irf(pl, t, args):
@@ -70,10 +70,7 @@ def build_irf(t, irf_type='Gauss', weighted=True, fwhm=55 * ps, tau_wt=40 * ps,
         `irf_type` is set to `'Gauss'`.
     c : float
         Offset for IRF, recommended as zero.
-    
-        
-    
-    
+
     """
     
     tirf = t[t <= 3 * fwhm]
