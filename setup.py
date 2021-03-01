@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="KinetiKit",
-	version="0.1.7",
+	version="0.1.8",
 	author="Natalia Spitha",
 	author_email="natalia.spitha@gmail.com",
     packages=find_packages(exclude=("tests", "tests.*")),
