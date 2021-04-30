@@ -84,21 +84,21 @@ def MonoViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
                 data_ended = True
                 pass
                 
-            try:
-                aligned_sim = aligned_sims[i]
-                art.plot3scales.plot(dtime, aligned_sim, system, t_dict=to, ivtype='none', 
-                                 annotate=True, fig=fig, ResetColorCyc=i==0, 
-                                 color=color_range[i],
-                                 linewidth=8, opaq=0.4,
-                                 mlabel='sim_%0.3f'%(power_list[i]),
-                                 xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
-                                 
-            except IndexError:
-                sims_ended = True
-                pass
-            
-            if sims_ended and data_ended:
-                break
+        try:
+            aligned_sim = aligned_sims[i]
+            art.plot3scales.plot(dtime, aligned_sim, system, t_dict=to, ivtype='none', 
+                                annotate=True, fig=fig, ResetColorCyc=i==0, 
+                                color=color_range[i],
+                                linewidth=8, opaq=0.4,
+                                mlabel='sim_%0.3f'%(power_list[i]),
+                                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+                                
+        except IndexError:
+            sims_ended = True
+            pass
+        
+        if sims_ended and data_ended:
+            break
             
     return
 
