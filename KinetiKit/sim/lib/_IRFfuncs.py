@@ -39,7 +39,7 @@ def convolve_irf(pl, t, args):
 
 
 def build_irf(t, irf_type='Gauss', weighted=True, fwhm=55 * ps, tau_wt=40 * ps, 
-              tau=650 * ps, b=0.13, c=0):
+              tau=650 * ps, b=0.13, c=0, return_x = False):
     """
     Constructs a Gaussian-like curve simulating an instrument response function
     of a time-resolved measurement system. 
@@ -73,18 +73,24 @@ def build_irf(t, irf_type='Gauss', weighted=True, fwhm=55 * ps, tau_wt=40 * ps,
 
     """
     
-    tirf = t[t <= 3 * fwhm]
-    tirf -= tirf.mean()
+    
+    
     if irf_type == 'Gauss':
+        tirf = t[t <= 3 * fwhm]
+        tirf -= tirf.mean()
         irf = kin_kit.Gauss(tirf, 1, 0, fwhm)
     elif irf_type == 'GaussDiff':
-        irf = kin_kit.GaussDiff(t, np.max(t)/2, 1, fwhm=fwhm, tau=tau, 
+        tirf = t[t <= 100 * fwhm]
+        irf = kin_kit.GaussDiff(tirf, (np.max(tirf)-np.min(tirf))/50+np.min(tirf), 1, fwhm=fwhm, tau=tau, 
                                 b=b, c=c, weighted=weighted, tau_wt=tau_wt)
         window_length = int(0.006*len(t))
         if window_length%2 == 0:
             window_length += 1
         irf = savgol_filter(irf, window_length=window_length, polyorder=1)
-    return irf / irf.sum()
+    if return_x:
+        return tirf, irf/irf.sum()
+    else:
+        return irf / irf.sum()
 
 def convolve_cyclic_boundary(data, irf):
     m = irf.size

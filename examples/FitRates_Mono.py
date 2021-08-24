@@ -74,10 +74,10 @@ FWHM are supported)
 """
 irf_args = {'irf_type': 'GaussDiff',
             'weighted' : True,
-            'fwhm': 30 * ps,
-            'tau': 700 *ps,
-            'b': 0.1,
-            'tau_wt': 60 *ps
+            'fwhm': 55 * ps,
+            'tau': 800 *ps,
+            'b': 0.07,
+            'tau_wt': 10 *ps
             }
 
 """
