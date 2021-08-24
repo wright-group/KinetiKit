@@ -21,7 +21,7 @@ def simulate(p0, RE_set, t_obj, light_obj):
     subsample = t_obj['subsample']
 
     # --- Incident Photons --- #
-    pulse = light_obj.gen_pulse(t[t <= light_obj.pulse_window], stepsize=dt)
+    pulse = light_obj.gen_pulse(t[t <= light_obj.pulse_window], center=0.5*light_obj.pulse_window, stepsize=dt)
     cw = light_obj.cw_power
 
     # --- Population arrays --- #
@@ -95,7 +95,7 @@ def simulate_for_cycles(RE_set, t_obj, light_obj, numcycles=1, p0=None):
         p0 = current[:, -1]
     return current, converged
 
-def simulate_until_steady(RE_set, t_obj, light_obj, p0=None):
+def simulate_until_steady(RE_set, t_obj, light_obj, p0=None, verbose=False):
     """
     Performs a simulation given pulse and rate equation parameters until steady
     state is reached.
@@ -104,14 +104,19 @@ def simulate_until_steady(RE_set, t_obj, light_obj, p0=None):
     ----------
     RE_set : system instance
         requires `rate` method
-
-    Optional Parameters
-    ----------
     t_obj : dict
         Key value combinations from sim.time module
     light_obj : excitation object
         Contains information about the pulsed and CW excitation for the 
         simulated experiment.
+
+    Optional Parameters
+    ----------
+    p0 : array-like
+        initial carrier populations; must have the same length as 
+        RE_set.populations. Default is all zeros.
+    verbose : boolean
+        Whether to print debug-friendly informative messages. Default is False.
 
     Returns
     ----------
@@ -137,14 +142,15 @@ def simulate_until_steady(RE_set, t_obj, light_obj, p0=None):
             break
         converged = isSteady(p0, current[:, -1], tol=0.001)
         if converged:
-            #print("Reached steady after %i cycles"%c)
+            if verbose:
+                print("Reached steady after %i cycles"%c)
             break
         p0 = current[:, -1]
     if not converged and not toofast:
         print('Failed to reach steady state after %i cycles'%light_obj.numcycles)
     return current, converged
 
-def refined_simulation(RE_set, t_obj, light_obj, N_coarse=500, doubleSearch=False):
+def refined_simulation(RE_set, t_obj, light_obj, N_coarse=500, doubleSearch=False, verbose=False):
     """
     Performs a simulation with coarse time step until steady state is reached, 
     and then performs a final simulation with a finer time step.
@@ -172,7 +178,9 @@ def refined_simulation(RE_set, t_obj, light_obj, N_coarse=500, doubleSearch=Fals
         that you will reach the same steady state as you would if you ran the 
         entire simulation at the fine time scale, but is unnecessary if the
         prediction of the steady state population by the coarse simulation is
-        accurate (most often the case if `N_coarse > 500`). Default is False.
+        accurate. Default is False.
+    verbose : boolean
+        Whether to print debug-friendly informative messages. Default is False.
     
     Returns
     ----------
@@ -182,11 +190,11 @@ def refined_simulation(RE_set, t_obj, light_obj, N_coarse=500, doubleSearch=Fals
     converged : bool
         Whether or not the simulation converged within t_obj.numCycles loops
     """
-    
+    verbose=True
     #N_fine = t_obj['N']
     to_coarse = sim.time.update_linear(t_obj, **{'N' : N_coarse})
     tc_start = time.process_time()
-    coarse_sim, converged = simulate_until_steady(RE_set, to_coarse, light_obj)
+    coarse_sim, converged = simulate_until_steady(RE_set, to_coarse, light_obj, verbose=verbose)
     coarse_p0 = coarse_sim.transpose()[np.argmin(coarse_sim[0])]
     tc_end = time.process_time()
     
@@ -197,7 +205,7 @@ def refined_simulation(RE_set, t_obj, light_obj, N_coarse=500, doubleSearch=Fals
     
     tf_start = time.process_time()
     if doubleSearch:
-        fine_sim, converged = simulate_until_steady(RE_set, to_fine, light_obj, p0=coarse_p0)
+        fine_sim, converged = simulate_until_steady(RE_set, to_fine, light_obj, p0=coarse_p0, verbose=verbose)
     else: 
         fine_sim = simulate(coarse_p0, RE_set, to_fine, light_obj)
     tf_end = time.process_time()

@@ -104,8 +104,14 @@ def MonoViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
 
 def HeteroViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
         p15, p16, p17, p18, p19, p20,
+<<<<<<< Updated upstream
         to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_args = {}, 
         data=None, power_unit='microWatt', ids = ['layer 1', 'layer 2'],
+=======
+        to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_fwhm = 50*ps, 
+        data=None, power_unit='microWatt', ids = ['layer 1', 'layer 2'], 
+        light=sim.lib.Excitation(),
+>>>>>>> Stashed changes
         align_by = 'steep', avgnum= 5, xmin=0.1, xmax=None, ymin=1e-3, ymax=1.2):
     
     args = p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,\
@@ -118,8 +124,7 @@ def HeteroViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p1
     dtime = to['array'][::to['subsample']]
     
     power *= units[power_unit]
-    
-    light = sim.lib.Excitation(pulse={'power' : power})
+    light = light.updated_with(pulse={'power' : power})
     transient, converged = sim.lib.refined_simulation(system, to, light,
                                                   N_coarse=N_coarse)
     pl = kin_kit.make_2d(system.PLsig(transient))
@@ -149,8 +154,8 @@ def HeteroViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p1
                 fig=art.plot3scales.plot(dtime, d, sys_obj=None, t_dict=None,
                          annotate=False, fig=fig, linewidth=1, 
                          color=color_range[i],
-                         mlabel='data_%s'%(ids[i])
-                         )
+                         mlabel='data_%s'%(ids[i]),
+                         xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
             except IndexError:
                 data_ended = True
                 pass
@@ -173,6 +178,81 @@ def HeteroViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p1
             
     return
 
+def MultiPowerViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
+        p15, p16, p17, p18, p19, p20,
+        to=sim.time.linear(), N_coarse=500, pulse_power = 1e-6, cw_power=0, irf_fwhm = 50*ps, 
+        data=None, power_unit='microWatt', ids = ['layer 1', 'layer 2'], 
+        light=sim.lib.Excitation(),
+        align_by = 'steep', avgnum= 5, xmin=0.1, xmax=None, ymin=1e-3, ymax=1.2):
+    """
+    more functionality to allow for CW and pulsed power variations
+    """
+    args = p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,\
+        p15, p16, p17, p18, p19, p20,
+    param_names = system.params().keys()
+    trunc_args = args[:len(list(param_names))]
+    params = kin_kit.dict_from_list(trunc_args, param_names)
+    system.update(**params) # system is updated according to the parameters provided as *args
+            
+    #--- Creating Time Array
+    dtime = to['array'][::to['subsample']]
+    
+    pulse_power *= units[power_unit]
+    cw_power *= units[power_unit]
+    light = light.updated_with(pulse={'power' : pulse_power}, cw = {'power': cw_power})
+    transient, converged = sim.lib.refined_simulation(system, to, light,
+                                                  N_coarse=N_coarse)
+    pl = kin_kit.make_2d(system.PLsig(transient))
+    sims = sim.lib.convolve_irf(pl, dtime, fwhm=irf_fwhm)   
+    
+    # Aligns data with sim either by max. or steep
+    if align_by == 'steep':
+        aligned_sims = kin_kit.align_by_steep(sims, dtime, value = 0.5*ns, avgnum=avgnum)
+    
+    elif align_by == 'max':
+        aligned_sims = kin_kit.align_by_max(sims, dtime, value = 0.5*ns, avgnum=avgnum)
+    else:
+        print('\'align_by\' must be \'steep\' or \'max\'')
+    
+    aligned_sims = kin_kit.make_2d(aligned_sims)   
+    
+    fig=None
+    
+    data_ended = False; sims_ended = False
+    for i in range(20):
+        if data is None:
+            pass
+        else:
+            data=kin_kit.make_2d(data)
+            try:
+                d = data[i]
+                fig=art.plot3scales.plot(dtime, d, sys_obj=None, t_dict=None,
+                         annotate=False, fig=fig, linewidth=1, 
+                         color=color_range[i],
+                         mlabel='data_%s'%(ids[i]),
+                         xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+            except IndexError:
+                data_ended = True
+                pass
+                
+            try:
+                aligned_sim = aligned_sims[i]
+                art.plot3scales.plot(dtime, aligned_sim, system, t_dict=to, ivtype='none', 
+                                 annotate=True, fig=fig, ResetColorCyc=i==0, 
+                                 color=color_range[i],
+                                 linewidth=8, opaq=0.4, 
+                                 mlabel='sim_%s'%(ids[i]),
+                                 xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+                
+            except IndexError:
+                sims_ended = True
+                pass
+            
+            if sims_ended and data_ended:
+                break
+            
+    return
+    
 def FuncViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
         p15, p16, p17, p18, p19, p20,
         to=sim.time.linear(), N_coarse=500, power = 1e-6, irf_args={},
