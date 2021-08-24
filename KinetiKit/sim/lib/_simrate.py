@@ -190,7 +190,7 @@ def refined_simulation(RE_set, t_obj, light_obj, N_coarse=500, doubleSearch=Fals
     converged : bool
         Whether or not the simulation converged within t_obj.numCycles loops
     """
-    verbose=True
+    
     #N_fine = t_obj['N']
     to_coarse = sim.time.update_linear(t_obj, **{'N' : N_coarse})
     tc_start = time.process_time()

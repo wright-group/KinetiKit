@@ -104,11 +104,7 @@ def slice_by_time(arrays, timearray, lowlim=None, hilim=None):
 
 
 def simulate_and_compare(varparams, varparamkeys, system, data_arrays, to, 
-<<<<<<< Updated upstream
-                         light, powers=None, irf_args={'fwhm':55 * ps}, N_coarse=500, 
-=======
-                         light, powers=None, which='pulse', irf_fwhm=40*ps, N_coarse=500, 
->>>>>>> Stashed changes
+light, powers=None, which='pulse', irf_args={'fwhm':55 * ps}, N_coarse=500, 
                          roll_value=0, comparison='linear', absolute=True, 
                          limits = None, norm=True, roll_criterion='max', 
                          maxavgnum=10, condensed_output=True):
@@ -144,19 +140,12 @@ def simulate_and_compare(varparams, varparamkeys, system, data_arrays, to,
     light : object
         Excitation object that determines simulation
     powers : dictionary
-<<<<<<< Updated upstream
-        List of pulse powers at which experiment is conducted
-    irf_args: float, optional
-        Arguments for constructing the Instrument Response Function used for convolution. See
-        ``convolve_irf`` function. 
-=======
         List of powers at which experiment is conducted, in SI units
     which : string, 'pulse' or 'cw'
         whether the varied powers represent the pulsed or CW laser
-    irf_fwhm : float, optional
-        Width of Instrument Response Function used for convolution. See
-        ``convolve_irf`` function. Default is 40 ps.
->>>>>>> Stashed changes
+    irf_args: float, optional
+        Arguments for constructing the Instrument Response Function used for convolution. See
+        ``convolve_irf`` function. 
     N_coarse : integer
         N_coarse parameter of refined_simulation function.
     roll_value : float, optional
@@ -289,11 +278,7 @@ def simulate_and_compare(varparams, varparamkeys, system, data_arrays, to,
         return diffs.flatten()
 
 def sac_args(varparamkeys, system, data_arrays, to, 
-<<<<<<< Updated upstream
-                         light, powers=None, irf_args={'fwhm': 45 *ps}, N_coarse=500, roll_value=0, 
-=======
-                         light, powers=None, which = 'pulse', irf_fwhm=40*ps, N_coarse=500, roll_value=0, 
->>>>>>> Stashed changes
+                         light, powers=None, which='pulse', irf_args={'fwhm': 45 *ps}, N_coarse=500, roll_value=0, 
                          comparison='linear', absolute=True, limits = None,
                          norm=True, roll_criterion='max', maxavgnum=10,
                          condensed_output=True):
@@ -303,12 +288,8 @@ def sac_args(varparamkeys, system, data_arrays, to,
     does not accept keyword arguments, to selectively change some of the 
     arguments.
     """
-    
-<<<<<<< Updated upstream
-    return varparamkeys, system, data_arrays, to, light, powers,  irf_args, \
-=======
-    return varparamkeys, system, data_arrays, to, light, powers, which, irf_fwhm, \
->>>>>>> Stashed changes
+
+    return varparamkeys, system, data_arrays, to, light, powers, which,  irf_args, \
 N_coarse, roll_value, comparison, absolute, limits, norm, roll_criterion, \
 maxavgnum, condensed_output
  
