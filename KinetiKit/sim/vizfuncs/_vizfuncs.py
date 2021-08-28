@@ -175,7 +175,7 @@ def HeteroViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p1
 
 def MultiPowerViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14,
         p15, p16, p17, p18, p19, p20,
-        to=sim.time.linear(), N_coarse=500, pulse_power = 1e-6, cw_power=0, irf_args = {'fwhm':55*ps}, 
+        to=sim.time.linear(), refined=True, N_coarse=500, pulse_power = 1e-6, cw_power=0, irf_args = {'fwhm':55*ps}, 
         data=None, power_unit='microWatt', ids = ['layer 1', 'layer 2'], 
         light=sim.lib.Excitation(),
         align_by = 'steep', avgnum= 5, xmin=0.1, xmax=None, ymin=1e-3, ymax=1.2):
@@ -195,8 +195,12 @@ def MultiPowerViz(system, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13
     pulse_power *= units[power_unit]
     cw_power *= units[power_unit]
     light = light.updated_with(pulse={'power' : pulse_power}, cw = {'power': cw_power})
-    transient, converged = sim.lib.refined_simulation(system, to, light,
+    if refined: 
+        transient, converged = sim.lib.refined_simulation(system, to, light,
                                                   N_coarse=N_coarse)
+    else:
+        transient, converged = sim.lib.simulate_until_steady(system, to, light)
+    
     pl = kin_kit.make_2d(system.PLsig(transient))
     sims = sim.lib.convolve_irf(pl, dtime, args=irf_args)   
     
