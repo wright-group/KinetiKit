@@ -80,13 +80,7 @@ align_to = 0.5*ns # value to which data and simulation are aligned for saving
 Define Instrument Response Function FWHM (Note: currently, only simulated
 FWHM are supported)
 """
-irf_args = {'irf_type': 'GaussDiff',
-            'weighted' : True,
-            'fwhm': 30 * ps,
-            'tau': 700 *ps,
-            'b': 0.1,
-            'tau_wt': 60 *ps
-            }
+irf_fwhm = 40*ps
 
 """
 Choose System type, Initial parameters, and search boundaries. 
@@ -169,7 +163,7 @@ conditions = fit.lib.sac_args(
         data_arrays = all_y,
         to = to,
         light = light,
-        irf_args = irf_args,
+        irf_fwhm = irf_fwhm,
         N_coarse = N_coarse,  
         comparison=comparison_type, # 'linear' or 'log'
         absolute=absolute,
@@ -180,7 +174,7 @@ conditions = fit.lib.sac_args(
         )
 
 if doFit:
-    time_start = time.time()
+    time_start = time.clock()
     counter = 0
     # First perform a global search using Differential Evolution
     opt_DE = sp.optimize.differential_evolution(fit.lib.simulate_and_compare,
@@ -201,7 +195,7 @@ if doFit:
         errordict = None
         fitparams = opt_DE.x
     
-    time_elapsed = time.time() - time_start
+    time_elapsed = time.clock() - time_start
     print('Fitting took %0.5f seconds'%(time_elapsed))
     fitparamdict = kin_kit.dict_from_list(fitparams, bounds.keys())
     
@@ -218,7 +212,7 @@ system.update(**fitparamdict) # system updated with fit parameters
 transient, converged = sim.lib.refined_simulation(system, to, light, N_coarse=N_coarse) # system re-simulated with fit parameters
 species_set = transient # set of population's time evolution
 pl = system.PLsig(transient) # PLsig function applied to population arrays
-sims = sim.lib.convolve_irf(pl, dtime, irf_args)   # PL signal convolved with IRF
+sims = sim.lib.convolve_irf(pl, dtime)   # PL signal convolved with IRF
 
 # alignment
 if roll_criterion == 'max':

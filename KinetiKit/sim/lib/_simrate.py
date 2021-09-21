@@ -21,13 +21,13 @@ def simulate(p0, RE_set, t_obj, light_obj):
     subsample = t_obj['subsample']
 
     # --- Incident Photons --- #
-    pulse = light_obj.gen_pulse(t[t <= light_obj.pulse_window], center=0.5*light_obj.pulse_window, stepsize=dt)
+    pulse = light_obj.gen_pulse(t[t <= light_obj.pulse_window], stepsize=dt)
     cw = light_obj.cw_power
 
     # --- Population arrays --- #
     out = np.zeros((RE_set.popnum, t.size // subsample))
     p_current = p0.copy() if p0 is not None else np.zeros(RE_set.shape)
-
+    
     for i in range(t.size):
         p_previous = p_current.copy()
 
@@ -37,11 +37,8 @@ def simulate(p0, RE_set, t_obj, light_obj):
         if i<5:
             pass
             #print(i, p_current, RE_set.rate(p_previous, photons))
-        
         p_current += dt * RE_set.rate(p_previous, photons)
-        # if i<10:
-        #     print('dt', dt/1e-9, 'ns, photons', photons)
-        #     print(p_current)
+        
         if i % subsample == 0:
             out[:, i // subsample] = p_current
 
@@ -98,7 +95,7 @@ def simulate_for_cycles(RE_set, t_obj, light_obj, numcycles=1, p0=None):
         p0 = current[:, -1]
     return current, converged
 
-def simulate_until_steady(RE_set, t_obj, light_obj, p0=None, verbose=False):
+def simulate_until_steady(RE_set, t_obj, light_obj, p0=None):
     """
     Performs a simulation given pulse and rate equation parameters until steady
     state is reached.
@@ -107,19 +104,14 @@ def simulate_until_steady(RE_set, t_obj, light_obj, p0=None, verbose=False):
     ----------
     RE_set : system instance
         requires `rate` method
+
+    Optional Parameters
+    ----------
     t_obj : dict
         Key value combinations from sim.time module
     light_obj : excitation object
         Contains information about the pulsed and CW excitation for the 
         simulated experiment.
-
-    Optional Parameters
-    ----------
-    p0 : array-like
-        initial carrier populations; must have the same length as 
-        RE_set.populations. Default is all zeros.
-    verbose : boolean
-        Whether to print debug-friendly informative messages. Default is False.
 
     Returns
     ----------
@@ -139,22 +131,20 @@ def simulate_until_steady(RE_set, t_obj, light_obj, p0=None, verbose=False):
     for c in range(1, light_obj.numcycles+1):
         current = simulate(p0, RE_set, t_obj, light_obj)
         if (current<0).any():
-            if verbose:
-                print('Too fast')
+            #print('Too fast')
             toofast=True
             current = np.zeros(current.shape)-1
             break
         converged = isSteady(p0, current[:, -1], tol=0.001)
         if converged:
-            if verbose:
-                print("Reached steady after %i cycles"%c)
+            #print("Reached steady after %i cycles"%c)
             break
         p0 = current[:, -1]
     if not converged and not toofast:
         print('Failed to reach steady state after %i cycles'%light_obj.numcycles)
     return current, converged
 
-def refined_simulation(RE_set, t_obj, light_obj, N_coarse=500, doubleSearch=False, verbose=False):
+def refined_simulation(RE_set, t_obj, light_obj, N_coarse=500, doubleSearch=False):
     """
     Performs a simulation with coarse time step until steady state is reached, 
     and then performs a final simulation with a finer time step.
@@ -182,9 +172,7 @@ def refined_simulation(RE_set, t_obj, light_obj, N_coarse=500, doubleSearch=Fals
         that you will reach the same steady state as you would if you ran the 
         entire simulation at the fine time scale, but is unnecessary if the
         prediction of the steady state population by the coarse simulation is
-        accurate. Default is False.
-    verbose : boolean
-        Whether to print debug-friendly informative messages. Default is False.
+        accurate (most often the case if `N_coarse > 500`). Default is False.
     
     Returns
     ----------
@@ -198,7 +186,7 @@ def refined_simulation(RE_set, t_obj, light_obj, N_coarse=500, doubleSearch=Fals
     #N_fine = t_obj['N']
     to_coarse = sim.time.update_linear(t_obj, **{'N' : N_coarse})
     tc_start = time.process_time()
-    coarse_sim, converged = simulate_until_steady(RE_set, to_coarse, light_obj, verbose=verbose)
+    coarse_sim, converged = simulate_until_steady(RE_set, to_coarse, light_obj)
     coarse_p0 = coarse_sim.transpose()[np.argmin(coarse_sim[0])]
     tc_end = time.process_time()
     
@@ -209,7 +197,7 @@ def refined_simulation(RE_set, t_obj, light_obj, N_coarse=500, doubleSearch=Fals
     
     tf_start = time.process_time()
     if doubleSearch:
-        fine_sim, converged = simulate_until_steady(RE_set, to_fine, light_obj, p0=coarse_p0, verbose=verbose)
+        fine_sim, converged = simulate_until_steady(RE_set, to_fine, light_obj, p0=coarse_p0)
     else: 
         fine_sim = simulate(coarse_p0, RE_set, to_fine, light_obj)
     tf_end = time.process_time()
