@@ -50,7 +50,7 @@ def elementwise_diff(data_arrays, sim_arrays, norm=True, comparison='linear',
        print('Comparison must be linear or log.')
        
     if np.all(sim_arrays==0):
-        diffs = np.ones(sim_arrays.shape)*100000
+        diffs = np.ones(sim_arrays.shape)*1e20
         return diffs
     
     #print(len(data_arrays), len(sim_arrays))
@@ -183,6 +183,7 @@ light, powers=None, which='pulse', irf_args={'fwhm':55 * ps}, N_coarse=500,
     
     param_dict = kin_kit.dict_from_list(varparams, varparamkeys)
     system.update(**param_dict)
+    # print(system.params())
     if light is not None:
         pulse = light.pulse
     dtime = to['array'][::to['subsample']]
@@ -273,8 +274,10 @@ light, powers=None, which='pulse', irf_args={'fwhm':55 * ps}, N_coarse=500,
   
     #print("diff : %0.3e"%(np.sum(diffs**2)/(to['N']/to['subsample'])))
     if condensed_output:
+        print(np.average(np.sum(diffs**2)))
         return np.sum(diffs**2)
     else:
+        print(np.average(diffs.flatten()))
         return diffs.flatten()
 
 def sac_args(varparamkeys, system, data_arrays, to, 

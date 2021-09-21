@@ -43,6 +43,11 @@ class Excitation():
         self.numcycles = numcycles
         
     def gen_pulse(self, t, center=0, stepsize=None):
+        """
+        generates a Gaussian pulse along a time array; if the time step is too large
+        compared to the FWHM of the pulse, a 1x1 array is generated that contains the 
+        rate of arrival of photons.
+        """
         pulseCarriers = self.pulse_carriers
         sigma_to_fwhm = 2 * np.sqrt(2 * np.log(2))
         pulsePeak = pulseCarriers * sigma_to_fwhm \

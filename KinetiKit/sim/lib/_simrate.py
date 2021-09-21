@@ -27,7 +27,7 @@ def simulate(p0, RE_set, t_obj, light_obj):
     # --- Population arrays --- #
     out = np.zeros((RE_set.popnum, t.size // subsample))
     p_current = p0.copy() if p0 is not None else np.zeros(RE_set.shape)
-    
+
     for i in range(t.size):
         p_previous = p_current.copy()
 
@@ -37,8 +37,11 @@ def simulate(p0, RE_set, t_obj, light_obj):
         if i<5:
             pass
             #print(i, p_current, RE_set.rate(p_previous, photons))
-        p_current += dt * RE_set.rate(p_previous, photons)
         
+        p_current += dt * RE_set.rate(p_previous, photons)
+        # if i<10:
+        #     print('dt', dt/1e-9, 'ns, photons', photons)
+        #     print(p_current)
         if i % subsample == 0:
             out[:, i // subsample] = p_current
 
@@ -136,7 +139,8 @@ def simulate_until_steady(RE_set, t_obj, light_obj, p0=None, verbose=False):
     for c in range(1, light_obj.numcycles+1):
         current = simulate(p0, RE_set, t_obj, light_obj)
         if (current<0).any():
-            #print('Too fast')
+            if verbose:
+                print('Too fast')
             toofast=True
             current = np.zeros(current.shape)-1
             break
