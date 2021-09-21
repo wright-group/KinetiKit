@@ -45,8 +45,8 @@ print('total photons delivered = ',  np.sum(pulse)*dt)
 
 plt.figure()
 ax=plt.subplot(1,1,1)
-plt.title('Pulse Viewer (%0.2f μW, %i fs, N= %i)'%(light_obj.pulse_energy*80*MHz*1e6, 
-          light_obj.pulse_fwhm/fs, t_dict['N']))
+plt.title('Pulse Viewer (%0.2f μW, %i fs, dt %i fs)'%(light_obj.pulse_energy*80*MHz*1e6, 
+          light_obj.pulse_fwhm/fs, int(dt*1e15)))
 
 if len(pulse)==1:
     plotted_time = np.array([-view_window, 0, view_window, 2*view_window])

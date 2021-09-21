@@ -9,6 +9,6 @@ from ._simfunc import *
 
 
 __all__ = ['Excitation',
-    'simulate_until_steady', 'convolve_irf',
+    'simulate_until_steady', 'convolve_irf', 'build_irf',
 'simulate', 'simulate_for_cycles', 'simulate_until_steady',
 'refined_simulation', 'simulate_func']
