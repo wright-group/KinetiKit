@@ -46,11 +46,8 @@ def elementwise_diff(data_arrays, sim_arrays, norm=True, comparison='linear',
         and `sim_arrays` in the form of an array of the same shape as the input
         arrays. 
     """
-    if comparison not in ['linear', 'log']:
-       print('Comparison must be linear or log.')
-       
     if np.all(sim_arrays==0):
-        diffs = np.ones(sim_arrays.shape)*1e20
+        diffs = np.ones(sim_arrays.shape)*100000
         return diffs
     
     #print(len(data_arrays), len(sim_arrays))
@@ -104,7 +101,7 @@ def slice_by_time(arrays, timearray, lowlim=None, hilim=None):
 
 
 def simulate_and_compare(varparams, varparamkeys, system, data_arrays, to, 
-light, powers=None, which='pulse', irf_args={'fwhm':55 * ps}, N_coarse=500, 
+                         light, powers=None, irf_fwhm=40*ps, N_coarse=500, 
                          roll_value=0, comparison='linear', absolute=True, 
                          limits = None, norm=True, roll_criterion='max', 
                          maxavgnum=10, condensed_output=True):
@@ -140,12 +137,10 @@ light, powers=None, which='pulse', irf_args={'fwhm':55 * ps}, N_coarse=500,
     light : object
         Excitation object that determines simulation
     powers : dictionary
-        List of powers at which experiment is conducted, in SI units
-    which : string, 'pulse' or 'cw'
-        whether the varied powers represent the pulsed or CW laser
-    irf_args: float, optional
-        Arguments for constructing the Instrument Response Function used for convolution. See
-        ``convolve_irf`` function. 
+        List of pulse powers at which experiment is conducted
+    irf_fwhm : float, optional
+        Width of Instrument Response Function used for convolution. See
+        ``convolve_irf`` function. Default is 40 ps.
     N_coarse : integer
         N_coarse parameter of refined_simulation function.
     roll_value : float, optional
@@ -180,10 +175,9 @@ light, powers=None, which='pulse', irf_args={'fwhm':55 * ps}, N_coarse=500,
     al_sim_list : array or list of 1D arrays
         Aligned simulation arrays.
     """
-    
+      
     param_dict = kin_kit.dict_from_list(varparams, varparamkeys)
     system.update(**param_dict)
-    # print(system.params())
     if light is not None:
         pulse = light.pulse
     dtime = to['array'][::to['subsample']]
@@ -198,7 +192,7 @@ light, powers=None, which='pulse', irf_args={'fwhm':55 * ps}, N_coarse=500,
     if system.populations is None:
         pl, converged = sim.lib.simulate_func(system, dtime)
         sim_arrays = sim.lib.convolve_irf(pl, dtime, 
-                                          irf_args)
+                                          fwhm=irf_fwhm)
     
     else:
         if powers is None:
@@ -207,19 +201,14 @@ light, powers=None, which='pulse', irf_args={'fwhm':55 * ps}, N_coarse=500,
                                                           N_coarse=N_coarse)
             pl = system.PLsig(transient)
             sim_arrays = sim.lib.convolve_irf(pl, dtime, 
-                                         irf_args)
+                                          fwhm=irf_fwhm)
             #sim_arrays /= max(sim_arrays)
             #data_arrays /= max(data_arrays)
             
         else:
             for i, power in enumerate(powers):
-                if which == 'pulse':
-                    light = light.updated_with(pulse={'power': power})
-                elif which == 'cw':
-                    light = light.updated_with(cw={'power': power})
-                else:
-                    print('parameter "which" should be "pulse" or "cw".')
-                
+                pulse['power'] = power
+                light = sim.lib.Excitation(pulse=pulse)
                 transient, converged = sim.lib.refined_simulation(system, to, light,
                                                           N_coarse=N_coarse)
                 pl_at_this_power = system.PLsig(transient)
@@ -227,9 +216,10 @@ light, powers=None, which='pulse', irf_args={'fwhm':55 * ps}, N_coarse=500,
                 if i == 0:
                     pl = pl_at_this_power
                 else:
-                    pl = np.vstack((pl, pl_at_this_power)) 
+                    pl = np.vstack((pl, pl_at_this_power))
+                
             sim_arrays = sim.lib.convolve_irf(pl, dtime, 
-                                          irf_args)    
+                                          fwhm=irf_fwhm)    
     
     
     if roll_criterion == 'max':
@@ -259,29 +249,27 @@ light, powers=None, which='pulse', irf_args={'fwhm':55 * ps}, N_coarse=500,
     
     sim_arrays = kin_kit.make_2d(sim_arrays)
     data_arrays = kin_kit.make_2d(data_arrays)
-    if not norm: 
-        # divide all traces by maximum value of highest-power trace 
-        sim_arrays /= max(sim_arrays[np.argmax(powers)]) 
-        data_arrays /= max(data_arrays[np.argmax(powers)])  
+    
+    # divide all traces by maximum value of highest-power trace 
+    sim_arrays /= max(sim_arrays[np.argmax(powers)]) 
+    data_arrays /= max(data_arrays[np.argmax(powers)])  
     
     if limits is not None:    
         al_data_arrays = slice_by_time(al_data_arrays, dtime, limits[0], limits[1])
         al_sim_arrays = slice_by_time(al_sim_arrays, dtime, limits[0], limits[1])
-
+    
     diffs = elementwise_diff(al_data_arrays, al_sim_arrays, 
                                  norm = norm, comparison=comparison,
                                  absolute = absolute)
-  
+        
     #print("diff : %0.3e"%(np.sum(diffs**2)/(to['N']/to['subsample'])))
     if condensed_output:
-        print(np.average(np.sum(diffs**2)))
         return np.sum(diffs**2)
     else:
-        print(np.average(diffs.flatten()))
         return diffs.flatten()
 
 def sac_args(varparamkeys, system, data_arrays, to, 
-                         light, powers=None, which='pulse', irf_args={'fwhm': 45 *ps}, N_coarse=500, roll_value=0, 
+                         light, powers=None, irf_fwhm=40*ps, N_coarse=500, roll_value=0, 
                          comparison='linear', absolute=True, limits = None,
                          norm=True, roll_criterion='max', maxavgnum=10,
                          condensed_output=True):
@@ -291,11 +279,11 @@ def sac_args(varparamkeys, system, data_arrays, to,
     does not accept keyword arguments, to selectively change some of the 
     arguments.
     """
-
-    return varparamkeys, system, data_arrays, to, light, powers, which,  irf_args, \
+    
+    return varparamkeys, system, data_arrays, to, light, powers,  irf_fwhm, \
 N_coarse, roll_value, comparison, absolute, limits, norm, roll_criterion, \
 maxavgnum, condensed_output
- 
+
 def fit_leastsq(function, p0, args):
     # original idea by https://stackoverflow.com/a/21844726
     errfunc = function(p0, *args)

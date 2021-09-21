@@ -44,10 +44,7 @@ def csv_to_dict(filename, sourcefolder='', headertype='row'):
             # get all the rows as a list
             data = list(reader)
             # transform data into numpy array
-            try:
-                values = np.transpose(np.array(data).astype(float))
-            except ValueError:
-                values = np.transpose(np.array(data).astype(str))
+            values = np.transpose(np.array(data).astype(float))
     
     outdict = {}
     

@@ -10,18 +10,12 @@ import matplotlib.pyplot as plt
 from KinetiKit import sim, artists
 from KinetiKit import kit as kin_kit
 
-from KinetiKit.units import ns, ps
+from KinetiKit.units import ns
 
 plot_output = False
 
 var_values = [1,2,3,4,5,6,7, 8, 9, 10, 11, 12]  # values that the varied parameter will take
-irf_args = {'irf_type': 'GaussDiff',
-            'weighted' : True,
-            'fwhm': 30 * ps,
-            'tau': 700 *ps,
-            'b': 0.1,
-            'tau_wt': 60 *ps
-            }  
+fwhm = 100e-12  # irf width [seconds]
 
 to = sim.time.linear(period=12.5*ns, N = 1000, subsample=1)
 dtime = to['array'][::to['subsample']]
@@ -51,7 +45,7 @@ for i, var_val in enumerate(var_values):
 
     rpl = system.PLsig(transient)
     
-    pl = sim.lib.convolve_irf(rpl, dtime, irf_args)
+    pl = sim.lib.convolve_irf(rpl, dtime, fwhm=fwhm)
     
     xs = transient[0]; es = transient[1]; hs = transient[2]
     

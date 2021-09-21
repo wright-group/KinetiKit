@@ -9,8 +9,6 @@ from ._ald import *
 from ._displaying import *
 
 __all__ = ['Gauss', 
-           'ExpGauss',
-           'GaussDiff',
            'align_by_max', 
            'align_by_steep',
            'csv_to_dict',

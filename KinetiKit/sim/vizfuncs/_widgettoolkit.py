@@ -46,11 +46,11 @@ def active_widgets(system, dictionary, total_args=20):
         # all_widgets[np.index(all_widgets==0] = fixed(0)
         return all_widgets
 
-def powerwidget(slidepower=False, pmin=0.001, pmax=1.5, pset = 0.5, step=0.01, power=0, label='power', unit='μW'):
+def powerwidget(slidepower=False, pmin=0.040, pmax=1.5, pset = 0.5, step=0.01, power=0, unit='μW'):
     if not slidepower:
         return fixed(power)
     else:
-        return widgets.FloatSlider(value=pset, min=pmin, max=pmax, step=step, description = '%s (%s)'%(label,unit),
+        return widgets.FloatSlider(value=pset, min=pmin, max=pmax, step=step, description = 'power (%s)'%unit,
                                    disabled=not slidepower, continuous_update=False, orientation='Horizontal',
                                    readout=slidepower, readoutformat='.3f')
 
