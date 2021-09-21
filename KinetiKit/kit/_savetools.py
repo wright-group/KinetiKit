@@ -119,7 +119,7 @@ def traces_to_csv(filename, dictionary):
             f.write('\n')
         print('Saved %s.csv.'%filename)
 
-def save_fit(filename, traces={}, params={}, destinationfolder=''):
+def save_fit(filename, traces={}, params={}, destinationfolder='', figs=True):
     """
     A shortcut for performing ``traces_to_csv`` and ``dict_to_csv``
     to save the fit parameters and data/sim traces of successful fits, and
@@ -143,10 +143,11 @@ def save_fit(filename, traces={}, params={}, destinationfolder=''):
         else:
             dict_to_csv(d,params)
             traces_to_csv(d,traces) 
-            plt.savefig(d+'.svg', format='svg')
-            print('Saved ' + d + '.svg')
-            plt.savefig(d+'.png', format='png')
-            print('Saved ' + d + '.png')
+            if figs:
+                plt.savefig(d+'.svg', format='svg')
+                print('Saved ' + d + '.svg')
+                plt.savefig(d+'.png', format='png')
+                print('Saved ' + d + '.png')
             break
 
 def save_species(filename, destinationfolder='', norm=False):

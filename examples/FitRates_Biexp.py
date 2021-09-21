@@ -56,7 +56,13 @@ align_to = 0.5*ns # value to which data and simulation are aligned for saving
 Define Instrument Response Function FWHM (Note: currently, only simulated
 FWHM are supported)
 """
-irf_fwhm = 40*ps
+irf_args = {'irf_type': 'GaussDiff',
+            'weighted' : True,
+            'fwhm': 30 * ps,
+            'tau': 700 *ps,
+            'b': 0.1,
+            'tau_wt': 60 *ps
+            }
 
 """
 Choose System type, Initial parameters, and search boundaries. 
@@ -131,7 +137,7 @@ conditions = fit.lib.sac_args(
         data_arrays = all_y,
         light=None,
         to = to,
-        irf_fwhm = irf_fwhm,
+        irf_args = irf_args,
         N_coarse = N_coarse,  
         comparison=comparison_type, # 'linear' or 'log'
         absolute=absolute,
@@ -142,7 +148,7 @@ conditions = fit.lib.sac_args(
         )
 
 if doFit:
-    time_start = time.clock()
+    time_start = time.time()
     counter = 0
     # First perform a global search using Differential Evolution
     opt_DE = sp.optimize.differential_evolution(fit.lib.simulate_and_compare,
@@ -165,7 +171,7 @@ if doFit:
         errordict = None
         fitparams = opt_DE.x
     
-    time_elapsed = time.clock() - time_start
+    time_elapsed = time.time() - time_start
     print('Fitting took %0.5f seconds'%(time_elapsed))
     fitparamdict = kin_kit.dict_from_list(fitparams, bounds.keys())
     
@@ -180,7 +186,7 @@ kin_kit.printparamsexp(fitparamdict) # display fit parameters
 
 system.update(**fitparamdict)
 pl, converged = sim.lib.simulate_func(system, dtime)
-sims = sim.lib.convolve_irf(pl, dtime, fwhm=irf_fwhm)   
+sims = sim.lib.convolve_irf(pl, dtime, irf_args)   
 
 # Aligns data with sim either by max. or steep
 if roll_criterion == 'max':

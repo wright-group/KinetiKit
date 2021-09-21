@@ -341,7 +341,9 @@ def show_species(time, species_sets, system, norm, save=False, filename=None, de
     
     if save:
         kin_kit.save_species(filename, destfolder, norm=norm)
-        
+    
+    return fig
+
 def find_min_value(axis, which='y'):
     """
     Finds and returns the minimum y value among all plotted traces in an axis
