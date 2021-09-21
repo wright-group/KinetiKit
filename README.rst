@@ -7,9 +7,9 @@ The latest releases of this package can be found on PyPI: https://pypi.org/proje
 An Anaconda Python installation is recommended: https://www.anaconda.com/distribution/
 Open the Anaconda Command Prompt and run ``pip install KinetiKit``. To update to the latest version if you have already installed the package, run ``pip install KinetiKit -upgrade`` instead.
 
-After installing the package, the simplest way to get started with the program is to come back to this Github page and download some of the files in the ``examples`` folder.
+After installing the package, the simplest way to get started with the program is to come back to this Github page and download some of the files in the ``examples`` folder. By saving one of those files as a .py or .ipynb file in a directory that contains your experimental data, you can define file paths in the scripts relative to the path of the scripts themselves.
 
-LIST OF EXAMPLE FILES (INSTRUCTIONS BELOW)
+LIST OF EXAMPLE FILES
 
 * calling_a_custom_model
 * custom_models
