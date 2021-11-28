@@ -107,7 +107,7 @@ def simulate_and_compare(varparams, varparamkeys, system, data_arrays, to,
 light, powers=None, which='pulse', irf_args={'fwhm':55 * ps}, N_coarse=500, 
                          roll_value=0, comparison='linear', absolute=True, 
                          limits = None, norm=True, roll_criterion='max', 
-                         maxavgnum=10, condensed_output=True):
+                         maxavgnum=10, condensed_output=True, verbose=False):
     """
     Returns an array or list of arrays of differences between a set of
     simulated data and a set of experimental data, after aligning them. 
@@ -169,6 +169,8 @@ light, powers=None, which='pulse', irf_args={'fwhm':55 * ps}, N_coarse=500,
     maxavgnum : integer
         If `roll_criterion` is `"max"`, maxavgnum determines the `avgnum` 
         keyword in ``KinetiKit.kit.align_by_max().``
+    verbose : boolean
+        Whether to print the cost function at the end of each iteration. 
         
     Returns
     -------
@@ -273,18 +275,21 @@ light, powers=None, which='pulse', irf_args={'fwhm':55 * ps}, N_coarse=500,
                                  absolute = absolute)
   
     #print("diff : %0.3e"%(np.sum(diffs**2)/(to['N']/to['subsample'])))
+     
     if condensed_output:
-        print(np.average(np.sum(diffs**2)))
+        if verbose:   
+            print(np.average(np.sum(diffs**2)))
         return np.sum(diffs**2)
     else:
-        print(np.average(diffs.flatten()))
+        if verbose:   
+            print(np.average(diffs.flatten()))
         return diffs.flatten()
 
 def sac_args(varparamkeys, system, data_arrays, to, 
                          light, powers=None, which='pulse', irf_args={'fwhm': 45 *ps}, N_coarse=500, roll_value=0, 
                          comparison='linear', absolute=True, limits = None,
                          norm=True, roll_criterion='max', maxavgnum=10,
-                         condensed_output=True):
+                         condensed_output=True, verbose=False):
     """
     Returns a list of all but the first argument of ``simulate_and_compare()``.
     Used inside a minimization function like ``differential_evolution``, which
@@ -294,7 +299,7 @@ def sac_args(varparamkeys, system, data_arrays, to,
 
     return varparamkeys, system, data_arrays, to, light, powers, which,  irf_args, \
 N_coarse, roll_value, comparison, absolute, limits, norm, roll_criterion, \
-maxavgnum, condensed_output
+maxavgnum, condensed_output, verbose
  
 def fit_leastsq(function, p0, args):
     # original idea by https://stackoverflow.com/a/21844726

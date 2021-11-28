@@ -111,7 +111,7 @@ bounds = {
 Fitting preferences
 """
 doFit = True # if False, system will be modeled with initparams
-doLS = True # whether to refine the optimization via a local least-squares 
+doLS = False # whether to refine the optimization via a local least-squares 
             # fitting (and obtain error estimates). Ignore if doFit = False
 settings['display_counter'] = True # display counter showing search iteration
 
@@ -183,6 +183,8 @@ if doFit:
     time_start = time.time()
     counter = 0
     # First perform a global search using Differential Evolution
+    if settings['display_counter']==True:
+        print("Search iteration counter...")
     opt_DE = sp.optimize.differential_evolution(fit.lib.simulate_and_compare,
                                               bounds= boundtuples, 
                                               args= conditions,

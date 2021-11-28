@@ -10,7 +10,7 @@ __all__ = ['simulate_until_steady', 'simulate',
 'refined_simulation']
 
 
-def simulate(p0, RE_set, t_obj, light_obj):
+def simulate(p0, RE_set, t_obj, light_obj, verbose=False):
     """
     Simulates ONE pulse cycle given an initial population, rate equation, 
     time, and excitation parameters.
@@ -35,8 +35,10 @@ def simulate(p0, RE_set, t_obj, light_obj):
         if i < pulse.size:
             photons += pulse[i]
         if i<5:
+            if verbose:
+                print(i, p_current, RE_set.rate(p_previous, photons))
             pass
-            #print(i, p_current, RE_set.rate(p_previous, photons))
+            
         
         p_current += dt * RE_set.rate(p_previous, photons)
         # if i<10:
@@ -137,7 +139,7 @@ def simulate_until_steady(RE_set, t_obj, light_obj, p0=None, verbose=False):
     else:
         p0 = p0
     for c in range(1, light_obj.numcycles+1):
-        current = simulate(p0, RE_set, t_obj, light_obj)
+        current = simulate(p0, RE_set, t_obj, light_obj, verbose=verbose)
         if (current<0).any():
             if verbose:
                 print('Too fast')

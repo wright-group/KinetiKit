@@ -54,7 +54,7 @@ output_name = key # can be anything, DO NOT include extension
 Define Time and Excitation Parameters
 """
 #--- arguments of sim.lib.Excitation()
-pulse_power = 1000*nW
+pulse_power = 45*nW
 reprate = 80 * MHz
 pulse_fwhm = 100*fs
 pulse_wavelength = 400*nm
@@ -103,7 +103,7 @@ bounds = {
 Fitting preferences
 """
 doFit = True # if False, system will be modeled with initparams
-doLS = True # whether to refine the optimization via a local least-squares 
+doLS = False # whether to refine the optimization via a local least-squares 
             # fitting (and obtain error estimates). Ignore if doFit = False
 settings['display_counter'] = True # display counter showing search iteration
 
@@ -175,6 +175,8 @@ if doFit:
     time_start = time.time()
     counter = 0
     # First perform a global search using Differential Evolution
+    if settings['display_counter']==True:
+        print("Search iteration counter...")
     opt_DE = sp.optimize.differential_evolution(fit.lib.simulate_and_compare,
                                               bounds= boundtuples, 
                                               args= conditions,

@@ -2,7 +2,7 @@
 Fit with Rates_Mono model
 
 Example file for fitting a data object with a biexponential function. 
-Requires numpy, scipy, matplotlib, and time packages along with TRPL package
+Requires numpy, scipy, matplotlib, and time packages along with KinetiKit package
 """
 
 
@@ -151,6 +151,8 @@ if doFit:
     time_start = time.time()
     counter = 0
     # First perform a global search using Differential Evolution
+    if settings['display_counter']==True:
+        print("Search iteration counter...")
     opt_DE = sp.optimize.differential_evolution(fit.lib.simulate_and_compare,
                                               bounds= boundtuples, 
                                               args= conditions,
